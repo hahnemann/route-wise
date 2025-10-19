@@ -1,2 +1,1 @@
-# A-Star
-Algorithm A Optimal Version
+# CSCI 5609 - Visualization (Fall 2005)
