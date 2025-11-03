@@ -1,6 +1,6 @@
 # Svelte
 # do not ignore the Svelte lib
-!routewise/src/lib/
+!route-wise/src/lib/
 
 # macOS.gitignore
 # General
