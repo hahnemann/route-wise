@@ -1,3 +1,7 @@
+# Svelte
+# do not ignore the Svelte lib
+!routewise/src/lib/
+
 # macOS.gitignore
 # General
 .DS_Store
@@ -42,7 +46,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
