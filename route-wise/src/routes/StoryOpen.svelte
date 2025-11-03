@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Scroll } from "$lib";
+    import { Scrolly } from "$lib";
     import { slide, fly } from "svelte/transition";
 
     type Props = {
@@ -10,7 +10,7 @@
     let progress: number = $state(0);
 </script>
 
-<Scroll bind:progress --scrolly-story-width="0">
+<Scrolly bind:progress --scrolly-story-width="0">
     <div id="virtual"></div>
     <div slot="viz" class="header">
         <h1>RouteWise</h1>
@@ -23,7 +23,7 @@
                 }}
                 class="text-xl font-medium"
             >
-                The Challenge of Traveling and Meeting in One Place
+                The Challenge of Traveling to Meet in One Place
             </p>
             <p
                 in:slide={{
@@ -33,37 +33,37 @@
                 }}
                 class="text-xl font-medium mt-1"
             >
-                A Deep Dive into {routeNum} Routes of the City-Pair-Program
+                Choosing from {routeNum} Destinations
             </p>
         {/if}
 
-        {#if progress > 70}
+        <!-- {#if progress > 70}
             <p in:fly={{ duration: 800, x: 0, y: 200 }}>
                 with data visualizations
             </p>
-        {/if}
+        {/if} -->
     </div>
-</Scroll>
+</Scrolly>
 
 <!-- <svelte:window bind:scrollY={progress} /> -->
 
 <style>
     .header {
-        background-color: rgb(255, 228, 193);
+        background-color: #F8F8F4;
         padding: 80px 60px;
         height: 60vh;
-        width: 800px;
+        width: 100%;
     }
     #virtual {
         height: 150vh; /* Make the page scrollable with a 150% view height */
     }
     h1 {
         font-size: 10vh;
-        color: #433417; /* Darker text for better contrast */
+        color: #36454F;
         font-weight: 600; /* Slightly bolder font weight */
     }
     p {
         font-size: 3vh;
-        color: #666;
+        color: #778899;
     }
 </style>

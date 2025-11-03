@@ -3,8 +3,11 @@
     import * as d3 from "d3";
     import type { CPP_RouteWise } from "../types";
     import StoryOpen from "./StoryOpen.svelte";
+    import ScrollyCard from "./ScrollyCard.svelte";
 
     let routes_cpp: CPP_RouteWise[] = [];
+    
+    let isLoading = true; 
 
     // Function to load the CSV
     async function loadCsv() {
@@ -26,6 +29,8 @@
             console.log("Loaded CSV Data:", routes_cpp);
         } catch (error) {
             console.error("Error loading CSV:", error);
+        } finally {
+            isLoading = false; 
         }
     }
     onMount(loadCsv);
@@ -33,11 +38,17 @@
 
 <div class="container">
     <StoryOpen routeNum={routes_cpp.length} />
+    
+    {#if !isLoading && routes_cpp.length > 0}
+        <ScrollyCard routes={routes_cpp} />
+    {:else}
+        <p>Loading route data...</p>
+    {/if}
 </div>
 
 <style>
     .container {
-        width: 80vw;
+        width: 100vw;
         margin: 10px auto;
         padding: 10px;
         align-content: center;
