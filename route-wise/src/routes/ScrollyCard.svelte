@@ -13,7 +13,7 @@
     // reactive variable for tracking the progress of the scrollytelling
 </script>
 
-<h2>Story Starts Here</h2>
+<h2>From Data Chaos to Strategic Decisions</h2>
 <!-- <p>
     First, we demonstrate how to use the Scrolly element to update the genre
     distribution based on year, which is estimated based on the scrolly y
@@ -23,33 +23,119 @@
 <Scrolly bind:progress={myProgress}>
     <div class="card-stack">
         <div class="card">
-            <h3>Scene 1: The Full Picture</h3>
+            <h3>Scene 1: The Problem</h3>
             <p>
-                This card represents the beginning of the journey. When this is
-                visible (e.g., myProgress is low), the visualization should show
-                all {routes.length} available routes, highlighting the sheer volume
-                of options.
+                The federal government's travel system involves a vast number of
+                potential destinations and millions in spending, but the sheer
+                volume of options is difficult to evaluate because agencies
+                <a
+                    href="https://www.gao.gov/assets/gao-16-657.pdf#page=2.23"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    lack common metrics
+                </a>
+                and consistent reporting practices for travel costs.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
         <div class="card">
-            <h3>Scene 2: Filtering by Price</h3>
+            <h3>Scene 2: Thousands of Travel Choices</h3>
             <p>
-                As we scroll down to this card, the visualization should update
+                The government's City Pair Program (CPP) currently offers over
+                11,000 different routes. As we scroll, the visualization begins
+                to filter this
+                <a
+                    href="https://www.gsa.gov/travel/plan-a-trip/transportation-airfare-rates-pov-rates-etc/airfare-rates-city-pair-program"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    massive number of destinations
+                </a>
+                to isolate the most affordable options for a potential meeting spot.
+                <!-- As we scroll down to this card, the visualization should update
                 (e.g., when myProgress > 30). We will filter the data to only
-                show routes where the average fare is below a certain threshold.
+                show routes where the average fare is below a certain threshold. -->
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
         <div class="card">
             <h3>Scene 3: Choosing the Meeting Spot</h3>
+            <p></p>
             <p>
-                When this final card is in view (e.g., myProgress > 70), the
+                Travel decisions are universally constrained by two critical
+                factors: cost and time. These two dictate the specific
+                performance metrics—like average fare and total journey
+                time—that we must visualize to identify the single, optimal
+                route for a group of people to meet.
+                <!-- When this final card is in view (e.g., myProgress > 70), the
                 visualization focuses on the remaining destinations, simulating
                 the decision process for the two travelers to find a common,
-                affordable meeting spot.
+                affordable meeting spot. -->
+            </p>
+            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+        </div>
+
+        <div class="card">
+            <h3>Scene 4: The Solution</h3>
+            <p>
+                When we consider cost and time as weights on the connections
+                (edges) between cities (nodes) as a graph, this problem becomes
+                a classic shortest path challenge. We can use
+                <a
+                    href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Dijkstra's algorithm
+                </a>
+                to mathematically solve this network problem and find the most efficient
+                route.
+            </p>
+            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+        </div>
+
+        <div class="card">
+            <h3>Scene 5: What is Optimal?</h3>
+            <p>
+                An optimal solution is not just the cheapest or fastest route,
+                but the one that provides the best balance between those two
+                conflicting metrics, often determined by a weighted combination
+                of cost and time based on the traveler's priorities. For now we
+                are only considering cost.
+            </p>
+            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+        </div>
+
+        <div class="card">
+            <h3>Scene 6: Solving with Python</h3>
+            <p>
+                To provide a definitive answer to the travel problem, we will
+                integrate a back-end solver This final step involves connecting
+                the Svelte visualization to Python code designed to execute the
+                Dijkstra algorithm and identify the single, optimal route,
+                fulfilling the goal of making the data usable.
+            </p>
+            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+        </div>
+
+        <div class="card">
+            <h3>Scene 7: The Optimal Meeting Place</h3>
+            <p>
+                The final step visualizes the optimal meeting destination on a
+                map, showing the best balance of cost. Factors like time and
+                pollution will be considered as we work out a final story. This
+                conclusive display mirrors complex
+                <a
+                    href="https://vega.github.io/vega/tutorials/airports/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    airport network analysis
+                </a>, though details on total travel time and cost metrics are
+                still being finalized for display.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
@@ -59,12 +145,21 @@
         <div class="viz-content">
             <p>Visualization updates based on progress...</p>
             <p>Current Progress: **{myProgress.toFixed(1)}%**</p>
-            {#if myProgress < 30}
-                <p>Showing **Scene 1** logic.</p>
-            {:else if myProgress < 70}
-                <p>Showing **Scene 2** logic (Filter active).</p>
+
+            {#if myProgress < 14.29}
+                <p>Showing **Scene 1** logic (The Problem).</p>
+            {:else if myProgress < 28.57}
+                <p>Showing **Scene 2** logic (Thousands of Travel Choices).</p>
+            {:else if myProgress < 42.86}
+                <p>Showing **Scene 3** logic (Choosing the Meeting Spot).</p>
+            {:else if myProgress < 57.14}
+                <p>Showing **Scene 4** logic (The Solution).</p>
+            {:else if myProgress < 71.43}
+                <p>Showing **Scene 5** logic (What is Optimal?).</p>
+            {:else if myProgress < 85.71}
+                <p>Showing **Scene 6** logic (Solving with Python).</p>
             {:else}
-                <p>Showing **Scene 3** logic (Final selection).</p>
+                <p>Showing **Scene 7** logic (The Optimal Meeting Place).</p>
             {/if}
         </div>
     </div>

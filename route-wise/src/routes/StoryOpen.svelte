@@ -23,7 +23,7 @@
                 }}
                 class="text-xl font-medium"
             >
-                The Challenge of Traveling to Meet in One Place
+                Visualizing Inefficient Federal Travel Spending
             </p>
             <p
                 in:slide={{
@@ -49,7 +49,7 @@
 
 <style>
     .header {
-        background-color: #F8F8F4;
+        background-color: #f8f8f4;
         padding: 80px 60px;
         height: 60vh;
         width: 100%;
@@ -59,7 +59,7 @@
     }
     h1 {
         font-size: 10vh;
-        color: #36454F;
+        color: #36454f;
         font-weight: 600; /* Slightly bolder font weight */
     }
     p {

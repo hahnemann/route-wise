@@ -6,8 +6,8 @@
     import ScrollyCard from "./ScrollyCard.svelte";
 
     let routes_cpp: CPP_RouteWise[] = [];
-    
-    let isLoading = true; 
+
+    let isLoading = true;
 
     // Function to load the CSV
     async function loadCsv() {
@@ -30,7 +30,7 @@
         } catch (error) {
             console.error("Error loading CSV:", error);
         } finally {
-            isLoading = false; 
+            isLoading = false;
         }
     }
     onMount(loadCsv);
@@ -38,7 +38,7 @@
 
 <div class="container">
     <StoryOpen routeNum={routes_cpp.length} />
-    
+
     {#if !isLoading && routes_cpp.length > 0}
         <ScrollyCard routes={routes_cpp} />
     {:else}
