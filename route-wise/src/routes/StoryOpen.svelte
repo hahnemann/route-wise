@@ -12,10 +12,10 @@
 
 <Scrolly bind:progress --scrolly-story-width="0">
     <div id="virtual"></div>
-    <div slot="viz" class="header">
+    <div slot="viz" class="header" style="border: 1px solid blue;">
         <h1>RouteWise</h1>
-
-        {#if progress > 30}
+        <h2>Visualizing Inefficient Federal Travel Spending</h2>
+        <!-- {#if progress > 30}
             <p
                 in:slide={{
                     duration: 1000,
@@ -35,7 +35,7 @@
             >
                 Choosing from {routeNum} Destinations
             </p>
-        {/if}
+        {/if} -->
 
         <!-- {#if progress > 70}
             <p in:fly={{ duration: 800, x: 0, y: 200 }}>
@@ -49,21 +49,22 @@
 
 <style>
     .header {
-        background-color: #f8f8f4;
-        padding: 80px 60px;
+        /* background-color: #f8f4f7; */
+        /* padding: 80px 60px; */
         height: 60vh;
         width: 100%;
+        text-align: center;
     }
     #virtual {
-        height: 150vh; /* Make the page scrollable with a 150% view height */
+        height: 60vh; /* Make the page scrollable with a 150% view height */
     }
     h1 {
         font-size: 10vh;
         color: #36454f;
         font-weight: 600; /* Slightly bolder font weight */
     }
-    p {
+    /* p {
         font-size: 3vh;
         color: #778899;
-    }
+    } */
 </style>

@@ -36,8 +36,8 @@
     onMount(loadCsv);
 </script>
 
-<div class="container">
-    <StoryOpen routeNum={routes_cpp.length} />
+<div class="container" style="border: 1px solid lightgray;">
+    <!-- <StoryOpen routeNum={routes_cpp.length} /> -->
 
     {#if !isLoading && routes_cpp.length > 0}
         <ScrollyCard routes={routes_cpp} />
@@ -48,9 +48,10 @@
 
 <style>
     .container {
-        width: 100vw;
+        width: 100%;
         margin: 10px auto;
-        padding: 10px;
+        padding: 50px 50px 50px 50px; /* top, right, bottom, left */
         align-content: center;
+        box-sizing: border-box;
     }
 </style>

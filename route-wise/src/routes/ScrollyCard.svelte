@@ -13,21 +13,20 @@
     // reactive variable for tracking the progress of the scrollytelling
 </script>
 
-<h2>From Data Chaos to Strategic Decisions</h2>
-<!-- <p>
-    First, we demonstrate how to use the Scrolly element to update the genre
-    distribution based on year, which is estimated based on the scrolly y
-    position of the left text panel
-</p> -->
+<p></p>
 
 <Scrolly bind:progress={myProgress}>
     <div class="card-stack">
         <div class="card">
-            <h3>Scene 1: The Problem</h3>
+            <h3>Scene 1: The Challenge of Meeting in One Place</h3>
             <p>
-                The federal government's travel system involves a vast number of
-                potential destinations and millions in spending, but the sheer
-                volume of options is difficult to evaluate because agencies
+                What if you had to gather people from all across the country in
+                one place — quickly and cheaply?
+            </p>
+            <!-- <p>The federal government's travel
+                system involves a vast number of potential destinations and
+                millions in spending, but the sheer volume of options is
+                difficult to evaluate because agencies
                 <a
                     href="https://www.gao.gov/assets/gao-16-657.pdf#page=2.23"
                     target="_blank"
@@ -36,13 +35,14 @@
                     lack common metrics
                 </a>
                 and consistent reporting practices for travel costs.
-            </p>
+            </p> -->
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
         <div class="card">
-            <h3>Scene 2: Thousands of Travel Choices</h3>
-            <p>
+            <h3>Scene 2: Real World Motivation</h3>
+            <p>When meeting logistics waste taxpayer dollars.</p>
+            <!-- <p>
                 The government's City Pair Program (CPP) currently offers over
                 11,000 different routes. As we scroll, the visualization begins
                 to filter this
@@ -54,33 +54,34 @@
                     massive number of destinations
                 </a>
                 to isolate the most affordable options for a potential meeting spot.
-                <!-- As we scroll down to this card, the visualization should update
-                (e.g., when myProgress > 30). We will filter the data to only
-                show routes where the average fare is below a certain threshold. -->
-            </p>
+            </p> -->
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
         <div class="card">
             <h3>Scene 3: Choosing the Meeting Spot</h3>
-            <p></p>
             <p>
+                Imagine two colleagues — one in Minneapolis, another in Dallas.
+                They need to fly and meet somewhere for a one-day training.
+                Should the person in Minnesota fly to Texas? Or should the
+                person in Texas fly north? Maybe neither — perhaps they should
+                meet halfway, in Kansas City, or even at a smaller nearby
+                airport.
+            </p>
+            <!-- <p>
                 Travel decisions are universally constrained by two critical
                 factors: cost and time. These two dictate the specific
                 performance metrics—like average fare and total journey
                 time—that we must visualize to identify the single, optimal
                 route for a group of people to meet.
-                <!-- When this final card is in view (e.g., myProgress > 70), the
-                visualization focuses on the remaining destinations, simulating
-                the decision process for the two travelers to find a common,
-                affordable meeting spot. -->
-            </p>
+            </p> -->
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
         <div class="card">
-            <h3>Scene 4: The Solution</h3>
-            <p>
+            <h3>Scene 4: The Algorithm</h3>
+            <p>Finding the most efficient path.</p>
+            <!-- <p>
                 When we consider cost and time as weights on the connections
                 (edges) between cities (nodes) as a graph, this problem becomes
                 a classic shortest path challenge. We can use
@@ -93,7 +94,7 @@
                 </a>
                 to mathematically solve this network problem and find the most efficient
                 route.
-            </p>
+            </p> -->
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
@@ -112,11 +113,7 @@
         <div class="card">
             <h3>Scene 6: Solving with Python</h3>
             <p>
-                To provide a definitive answer to the travel problem, we will
-                integrate a back-end solver This final step involves connecting
-                the Svelte visualization to Python code designed to execute the
-                Dijkstra algorithm and identify the single, optimal route,
-                fulfilling the goal of making the data usable.
+                Visualizing the solution and provide a definitive answer to the travel problem, as recommended by GAO.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
@@ -125,17 +122,7 @@
             <h3>Scene 7: The Optimal Meeting Place</h3>
             <p>
                 The final step visualizes the optimal meeting destination on a
-                map, showing the best balance of cost. Factors like time and
-                pollution will be considered as we work out a final story. This
-                conclusive display mirrors complex
-                <a
-                    href="https://vega.github.io/vega/tutorials/airports/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    airport network analysis
-                </a>, though details on total travel time and cost metrics are
-                still being finalized for display.
+                map. Factors like pollution will be considered as we work out a final story.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
@@ -143,23 +130,203 @@
 
     <div slot="viz" class="viz-panel">
         <div class="viz-content">
-            <p>Visualization updates based on progress...</p>
-            <p>Current Progress: **{myProgress.toFixed(1)}%**</p>
-
+            <p>Progress: {myProgress.toFixed(1)}%</p>
+            <!-- <p>Current Progress: **{myProgress.toFixed(1)}%**</p> -->
             {#if myProgress < 14.29}
-                <p>Showing **Scene 1** logic (The Problem).</p>
+                <p>Scene 1</p>
+                <p>
+                    A nationwide workforce of 3 million federal employees often
+                    travel for conferences, training, and cross-agency meetings
+                </p>
+                <p>
+                    <strong
+                        >Where should everyone meet to minimize total cost and
+                        travel time?</strong
+                    >
+                </p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/fy23_category.png"
+                            alt="Total (Approximate) Travel Cost in Fiscal
+                            Year 2023"
+                        />
+                        <figcaption>
+                            Table 1: Total (Approximate) Travel Cost in Fiscal
+                            Year 2023
+                        </figcaption>
+                    </figure>
+                    <p></p>
+                    <figure>
+                        <img
+                            src="/images/fy23_type.png"
+                            alt="Total (Approximate) Travel Cost in Fiscal
+                            Year 2023 by Category"
+                        />
+                        <figcaption>
+                            Table 2: Total (Approximate) Travel Cost in Fiscal
+                            Year 2023 by Category
+                        </figcaption>
+                    </figure>
+                </div>
             {:else if myProgress < 28.57}
-                <p>Showing **Scene 2** logic (Thousands of Travel Choices).</p>
+                <p>Scene 2</p>
+                <p>
+                    In 2013, the Treasury Inspector General for Tax
+                    Administration (TIGTA) released a report revealing that the
+                    IRS spent over $4 million on a single Anaheim conference and
+                    did not use a data-driven method to select the meeting
+                    location.
+                </p>
+                <p>
+                    In 2016 the Government Accountability Office (GAO)
+                    recommended a travel data management approach that would
+                    provide the government with more consistent travel cost data
+                </p>
+                <p>
+                    <strong
+                        >What if federal agencies used smart algorithms to
+                        minimize cost and travel time for meetings?</strong
+                    >
+                </p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/gao_report.png"
+                            alt="GAO Report (2016) to improve data and
+                            information sharing."
+                        />
+                        <figcaption>
+                            Figure 1: GAO Report (2016) to improve data and
+                            information sharing.
+                        </figcaption>
+                    </figure>
+                </div>
+                <!-- <p>Showing **Scene 2** logic (Thousands of Travel Choices).</p> -->
             {:else if myProgress < 42.86}
-                <p>Showing **Scene 3** logic (Choosing the Meeting Spot).</p>
+                <p>Scene 3</p>
+                <p>
+                    It sounds simple, but once you add just one more traveler,
+                    the choices explode. Each possible meeting city adds new
+                    combinations, new flight paths, new costs.
+                </p>
+                <p>
+                    <strong
+                        >We need to find a city with an airport that minimizes
+                        total travel cost for everyone, no matter where they
+                        start.
+                    </strong>
+                </p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/airports_connect_all.png"
+                            alt="US Airports full route graph (2008)."
+                        />
+                        <figcaption>
+                            Figure 2: US Airports full route graph (2008).
+                        </figcaption>
+                    </figure>
+                </div>
             {:else if myProgress < 57.14}
-                <p>Showing **Scene 4** logic (The Solution).</p>
+                <p>Scene 4</p>
+                <p>
+                    To solve the meeting-city problem, we turned to Dijkstra's
+                    algorithm — a classic method for finding the shortest path
+                    across a network.
+                </p>
+                <p>
+                    In our case, the network is made of airports, and each edge
+                    between them represents a fixed travel cost from the
+                    <a
+                        href="https://www.gsa.gov/travel/plan-a-trip/transportation-airfare-rates-pov-rates-etc/airfare-rates-city-pair-program"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        City-Pair-Program (CPP)
+                    </a> dataset.
+                </p>
+                <p>
+                    It's a simple but powerful search: efficient, deterministic,
+                    and perfectly suited for mapping travel decisions at scale.
+                </p>
+                <p>
+                    <strong
+                        >The algorithm explores all possible routes,
+                        continuously updating the lowest-cost paths until it
+                        finds the optimal meeting point — the city that
+                        minimizes the total cost for everyone involved.</strong
+                    >
+                </p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/dijkstra_animated.gif"
+                            alt="Dijkstra's Algorithm (Stony Brook University)"
+                        />
+                        <figcaption>
+                            Figure 3: Dijkstra's Algorithm (Stony Brook
+                            University).
+                        </figcaption>
+                    </figure>
+                </div>
             {:else if myProgress < 71.43}
-                <p>Showing **Scene 5** logic (What is Optimal?).</p>
+                <p>Scene 5</p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/a_star.gif"
+                            alt="A-Star Algorithm (Wikimedia Commons)"
+                        />
+                        <figcaption>
+                            Figure 4: A-Star Algorithm (Wikimedia Commons).
+                        </figcaption>
+                    </figure>
+                </div>
             {:else if myProgress < 85.71}
-                <p>Showing **Scene 6** logic (Solving with Python).</p>
+                <p>Scene 6</p>
+                <p>
+                    We plan to connect the Svelte visualization to Python code
+                    designed to execute the Dijkstra algorithm and identify the
+                    single, optimal route, fulfilling the goal of making the
+                    data usable - <strong>in real time.</strong>
+                </p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/vscode.png"
+                            alt="Visual Studio Code Solver."
+                        />
+                        <figcaption>
+                            Figure 5: Visual Studio Code Solver.
+                        </figcaption>
+                    </figure>
+                </div>
             {:else}
-                <p>Showing **Scene 7** logic (The Optimal Meeting Place).</p>
+                <p>Scene 7</p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/mci.png"
+                            alt="Kansas City - Optimal Meeting Place between Minnesota and Texas"
+                        />
+                        <figcaption>
+                            Figure 6: Kansas City - Optimal Meeting Place between Minnesota and Texas.
+                        </figcaption>
+                    </figure>
+                </div>
+                <p></p>
+                <div class="image-gallery">
+                    <figure>
+                        <img
+                            src="/images/msp_hou.png"
+                            alt="Optimal Meeting Place between Minnesota and Texas"
+                        />
+                        <figcaption>
+                            Figure 7: Optimal Meeting Place between Minnesota and Texas.
+                        </figcaption>
+                    </figure>
+                </div>
             {/if}
         </div>
     </div>
@@ -204,5 +371,25 @@
         border: 1px solid #ddd;
         padding: 20px;
         box-sizing: border-box;
+    }
+    image-gallery {
+        display: flex; /* Use flexbox to put them next to each other */
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+    .image-gallery figure {
+        flex: 1; /* Make both images take equal space */
+        margin: 0;
+        text-align: center;
+    }
+    .image-gallery img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+    figcaption {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 5px;
     }
 </style>
