@@ -6,6 +6,7 @@
     let { routes }: Props = $props();
 
     import { Scrolly } from "$lib";
+    import MapScene from "$lib/MapScene.svelte";
     import * as d3 from "d3";
     import { get } from "svelte/store";
 
@@ -217,16 +218,12 @@
                         start.
                     </strong>
                 </p>
-                <div class="image-gallery">
-                    <figure>
-                        <img
-                            src="/images/airports_connect_all.png"
-                            alt="US Airports full route graph (2008)."
-                        />
-                        <figcaption>
-                            Figure 2: US Airports full route graph (2008).
-                        </figcaption>
-                    </figure>
+                <div class="map-container">
+                    <MapScene points={[
+                        { lat: 44.8848, lon: -93.2284, name: 'Minneapolis (MSP)' },
+                        { lat: 32.8975, lon: -97.0382, name: 'Dallas (DFW)' },
+                        { lat: 39.2903, lon: -94.7133, name: 'Kansas City (MCI)' }
+                    ]} width={700} height={450} />
                 </div>
             {:else if myProgress < 57.14}
                 <p>Scene 4</p>
@@ -391,5 +388,9 @@
         font-size: 0.8em;
         color: #666;
         margin-top: 5px;
+    }
+    .map-container {
+        width: 100%;
+        margin: 20px 0;
     }
 </style>
