@@ -6,10 +6,10 @@
 	type MeetingRoute = {
 		meeting_airport: string;
 		total_cost: number;
-		path_from_MSP?: string;
-		cost_from_MSP?: number;
-		path_from_LAX?: string;
-		cost_from_LAX?: number;
+		path1?: string;
+		cost1?: number;
+		path2?: string;
+		cost2?: number;
 	};
 
 	type Props = {

@@ -21,6 +21,7 @@
 	export let filterIatas: string[] = [];
 	export let highlightIata: string | null = null;
 	export let originIatas: string[] = [];
+	export let routeData: any = null;
 
 	let svg: SVGSVGElement | null = null;
 	let allPoints: Point[] = [];
@@ -52,12 +53,79 @@
 		const pointSet = new Set<string>();
 		origins.forEach((o) => pointSet.add(o));
 		
-		// If highlight is set, also include the highlighted airport
-		if (hi) {
-			pointSet.add(hi);
+		// If highlight is set, also include the highlighted airport and all intermediate cities on routes
+		if (hi && routeData && Array.isArray(routeData)) {
+			const currentRoute = routeData.find((r: any) => r.meeting_airport === hi);
+			if (currentRoute) {
+				// Dynamically extract all paths from the route object
+				// Paths are stored with numeric keys like path1, path2, path3, etc.
+				const pathKeys = Object.keys(currentRoute)
+					.filter((key) => key.startsWith('path') && /^\d+$/.test(key.slice(4)))
+					.sort((a, b) => {
+						const numA = parseInt(a.slice(4), 10);
+						const numB = parseInt(b.slice(4), 10);
+						return numA - numB;
+					});
+				
+				pathKeys.forEach((pathKey) => {
+					const pathStr = currentRoute[pathKey];
+					if (pathStr) {
+						const pathCities = pathStr
+							.split('->')
+							.map((city: string) => city.trim().toUpperCase())
+							.filter((city: string) => city.length > 0);
+						pathCities.forEach((city: string) => pointSet.add(city));
+					}
+				});
+			}
 		}
 		
 		points = allPoints.filter((p) => p.name && pointSet.has(p.name));
+	};
+
+	const getIntermediateCities = (): Set<string> => {
+		const hi = highlightIata ? highlightIata.trim().toUpperCase() : '';
+		const origins = new Set(
+			(originIatas || [])
+				.map((c) => (typeof c === 'string' ? c.trim().toUpperCase() : ''))
+				.filter((c) => c.length > 0)
+		);
+		
+		const intermediates = new Set<string>();
+		
+		if (hi && routeData && Array.isArray(routeData)) {
+			const currentRoute = routeData.find((r: any) => r.meeting_airport === hi);
+			if (currentRoute) {
+				// Dynamically extract all paths from the route object
+				// Paths are stored with numeric keys like path1, path2, path3, etc.
+				const pathKeys = Object.keys(currentRoute)
+					.filter((key) => key.startsWith('path') && /^\d+$/.test(key.slice(4)))
+					.sort((a, b) => {
+						const numA = parseInt(a.slice(4), 10);
+						const numB = parseInt(b.slice(4), 10);
+						return numA - numB;
+					});
+				
+				pathKeys.forEach((pathKey) => {
+					const pathStr = currentRoute[pathKey];
+					if (pathStr) {
+						const pathCities = pathStr
+							.split('->')
+							.map((city: string) => city.trim().toUpperCase())
+							.filter((city: string) => city.length > 0);
+						
+						// Intermediate cities are those that are not origins and not the destination
+						pathCities.forEach((city: string) => {
+							if (!origins.has(city) && city !== hi) {
+								intermediates.add(city);
+							}
+						});
+					}
+				});
+			}
+		}
+		
+		return intermediates;
 	};
 
 	const render = () => {
@@ -81,43 +149,78 @@
 
 		// draw lines from origins to destination when highlighted
 		if (active) {
-			const originPoints = points.filter(
-				(p) => p.name && originIatas.map((o) => o.toUpperCase()).includes(p.name)
-			);
-			const destPoint = points.find((p) => p.name === active);
+			const lineLayer = g.append('g').attr('class', 'route-lines');
 
-			if (destPoint && originPoints.length > 0) {
-				const lineLayer = g.append('g').attr('class', 'route-lines');
+			// Draw lines from route data if available
+			if (routeData && Array.isArray(routeData)) {
+				const currentRoute = routeData.find((r: any) => r.meeting_airport === active);
+				if (currentRoute) {
+					// Dynamically extract all paths from the route object
+					// Paths are stored with numeric keys like path1, path2, path3, etc.
+					const pathKeys = Object.keys(currentRoute)
+						.filter((key) => key.startsWith('path') && /^\d+$/.test(key.slice(4)))
+						.sort((a, b) => {
+							const numA = parseInt(a.slice(4), 10);
+							const numB = parseInt(b.slice(4), 10);
+							return numA - numB;
+						});
 
-				originPoints.forEach((origin) => {
-					lineLayer
-						.append('line')
-						.attr('x1', () => {
-							const c = projection([origin.lon, origin.lat]);
-							return c ? c[0] : 0;
-						})
-						.attr('y1', () => {
-							const c = projection([origin.lon, origin.lat]);
-							return c ? c[1] : 0;
-						})
-						.attr('x2', () => {
-							const c = projection([destPoint.lon, destPoint.lat]);
-							return c ? c[0] : 0;
-						})
-						.attr('y2', () => {
-							const c = projection([destPoint.lon, destPoint.lat]);
-							return c ? c[1] : 0;
-						})
-						.attr('stroke', '#ff8800')
-						.attr('stroke-width', 2)
-						.attr('opacity', 0.6)
-						.attr('stroke-dasharray', '4,2');
-				});
+					pathKeys.forEach((pathKey) => {
+						const pathStr = currentRoute[pathKey];
+						if (pathStr) {
+							// Parse path string like "MSP->DEN->LAX" into array ["MSP", "DEN", "LAX"]
+							const pathCities = pathStr
+								.split('->')
+								.map((city: string) => city.trim().toUpperCase())
+								.filter((city: string) => city.length > 0);
+
+							// Draw lines between consecutive cities
+							for (let i = 0; i < pathCities.length - 1; i++) {
+								const fromCity = pathCities[i];
+								const toCity = pathCities[i + 1];
+
+								const fromPoint = allPoints.find((p) => p.name === fromCity);
+								const toPoint = allPoints.find((p) => p.name === toCity);
+
+								if (fromPoint && toPoint) {
+									lineLayer
+										.append('line')
+										.attr('x1', () => {
+											const c = projection([fromPoint.lon, fromPoint.lat]);
+											return c ? c[0] : 0;
+										})
+										.attr('y1', () => {
+											const c = projection([fromPoint.lon, fromPoint.lat]);
+											return c ? c[1] : 0;
+										})
+										.attr('x2', () => {
+											const c = projection([toPoint.lon, toPoint.lat]);
+											return c ? c[0] : 0;
+										})
+										.attr('y2', () => {
+											const c = projection([toPoint.lon, toPoint.lat]);
+											return c ? c[1] : 0;
+										})
+										.attr('stroke', '#ff8800')
+										.attr('stroke-width', 2)
+										.attr('opacity', 0.6)
+										.attr('stroke-dasharray', '4,2');
+								}
+							}
+						}
+					});
+				}
 			}
 		}
 
 		// draw city points
 		const cityLayer = g.append('g');
+		const intermediates = getIntermediateCities();
+		const origins = new Set(
+			(originIatas || [])
+				.map((c) => (typeof c === 'string' ? c.trim().toUpperCase() : ''))
+				.filter((c) => c.length > 0)
+		);
 
 		cityLayer
 			.selectAll('circle')
@@ -133,8 +236,16 @@
 				return c ? c[1] : -1000;
 			})
 			.attr('r', (d: Point) => (d.name === active ? 9 : 6))
-			.attr('fill', (d: Point) => (d.name === active ? '#ff8800' : '#e74c3c'))
-			.attr('stroke', (d: Point) => (d.name === active ? '#c05621' : '#c0392b'))
+			.attr('fill', (d: Point) => {
+				if (d.name === active) return '#ff8800'; // destination: orange
+				if (intermediates.has(d.name ?? '')) return '#9333ea'; // intermediate: purple
+				return '#e74c3c'; // origin: red
+			})
+			.attr('stroke', (d: Point) => {
+				if (d.name === active) return '#c05621';
+				if (intermediates.has(d.name ?? '')) return '#6b21a8';
+				return '#c0392b';
+			})
 			.attr('stroke-width', (d: Point) => (d.name === active ? 2 : 1.5))
 			.attr('opacity', (d: Point) => (d.name === active ? 1 : 0.9));
 

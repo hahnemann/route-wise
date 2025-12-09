@@ -1,4 +1,4 @@
-meeting_airport,total_cost,path_from_MSP,cost_from_MSP,path_from_LAX,cost_from_LAX
+meeting_airport,total_cost,path1,cost1,path2,cost2
 MSP,222,MSP,0,LAX->DEN->MSP,222
 DEN,222,MSP->DEN,106,LAX->DEN,116
 LAX,222,MSP->DEN->LAX,222,LAX,0

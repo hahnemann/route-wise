@@ -12,18 +12,15 @@
     import * as d3 from "d3";
     import { get } from "svelte/store";
 
-    type MeetingRoute = {
-        meeting_airport: string;
-        total_cost: number;
-        path_from_MSP?: string;
-        cost_from_MSP?: number;
-        path_from_LAX?: number;
-        cost_from_LAX?: number;
-    };
-
-    let myProgress = $state(0);
+	type MeetingRoute = {
+		meeting_airport: string;
+		total_cost: number;
+		[key: string]: any; // Allow dynamic path and cost columns
+	};    let myProgress = $state(0);
     let meetingRoutes = $state<MeetingRoute[]>([]);
     let activeIata: string | null = $state(null);
+    let originIatas = $state<string[]>([]);
+    
     const topRoutes = $derived(
         [...meetingRoutes]
             .sort((a, b) => a.total_cost - b.total_cost)
@@ -38,15 +35,47 @@
 
     onMount(async () => {
         try {
-            const rows = await d3.csv("/meeting_msp_lax.csv", (d) => ({
-                meeting_airport: (d.meeting_airport || "").toUpperCase(),
-                total_cost: Number(d.total_cost),
-                path_from_MSP: d.path_from_MSP,
-                cost_from_MSP: d.cost_from_MSP ? Number(d.cost_from_MSP) : undefined,
-                path_from_LAX: d.path_from_LAX,
-                cost_from_LAX: d.cost_from_LAX ? Number(d.cost_from_LAX) : undefined,
-            }));
+            // Load raw data first
+            const rawRows = await d3.csv("/meeting_msp_lax.csv");
+            
+            if (rawRows.length === 0) return;
+            
+            // Detect origin indices from the first row by finding path/cost columns
+            const firstRow = rawRows[0];
+            const pathKeys = Object.keys(firstRow)
+                .filter((key) => key.startsWith('path') && /^\d+$/.test(key.slice(4)))
+                .sort((a, b) => {
+                    const numA = parseInt(a.slice(4), 10);
+                    const numB = parseInt(b.slice(4), 10);
+                    return numA - numB;
+                });
+            
+            // Parse rows with dynamic columns
+            const rows: MeetingRoute[] = rawRows.map((d) => {
+                const row: MeetingRoute = {
+                    meeting_airport: (d.meeting_airport || "").toUpperCase(),
+                    total_cost: Number(d.total_cost)
+                };
+                
+                // Copy all path and cost columns dynamically
+                pathKeys.forEach((pathKey) => {
+                    const costKey = 'cost' + pathKey.slice(4);
+                    row[pathKey] = d[pathKey];
+                    if (d[costKey]) {
+                        row[costKey] = Number(d[costKey]);
+                    }
+                });
+                
+                return row;
+            });
+            
             meetingRoutes = rows.filter((r) => r.meeting_airport && Number.isFinite(r.total_cost));
+            
+            // Store origin IATAs - we'll need airport names from an external source or hardcode them
+            // For now, assume path1 is from first origin, path2 from second, etc.
+            // You may need to load this from a config or data source
+            originIatas = ['MSP', 'LAX']; // Default, but this could be detected or passed in
+            
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error("Failed to load meeting routes:", err);
@@ -264,13 +293,14 @@
                         height={350}
                         filterIatas={topRoutes.map((r) => r.meeting_airport)}
                         highlightIata={activeIata}
-                        originIatas={['MSP', 'LAX']}
+                        originIatas={originIatas}
+                        routeData={meetingRoutes}
                     />
                     <RankBar
                         routes={topRoutes}
                         width={Math.min(550, Math.max(300, window.innerWidth - 350))}
                         height={300}
-                        originIatas={['MSP', 'LAX']}
+                        originIatas={originIatas}
                         on:hover={handleHover}
                     />
                 </div>
