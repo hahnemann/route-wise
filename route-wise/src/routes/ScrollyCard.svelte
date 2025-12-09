@@ -5,13 +5,53 @@
     };
     let { routes }: Props = $props();
 
+    import { onMount } from "svelte";
     import { Scrolly } from "$lib";
     import MapScene from "$lib/MapScene.svelte";
+    import RankBar from "$lib/RankBar.svelte";
     import * as d3 from "d3";
     import { get } from "svelte/store";
 
+    type MeetingRoute = {
+        meeting_airport: string;
+        total_cost: number;
+        path_from_MSP?: string;
+        cost_from_MSP?: number;
+        path_from_LAX?: number;
+        cost_from_LAX?: number;
+    };
+
     let myProgress = $state(0);
-    // reactive variable for tracking the progress of the scrollytelling
+    let meetingRoutes = $state<MeetingRoute[]>([]);
+    let activeIata: string | null = $state(null);
+    const topRoutes = $derived(
+        [...meetingRoutes]
+            .sort((a, b) => a.total_cost - b.total_cost)
+            .slice(0, 10)
+    );
+
+    const handleHover = (e: any) => {
+        // eslint-disable-next-line no-console
+        console.log('Hover event received:', e.detail);
+        activeIata = e.detail.iata;
+    };
+
+    onMount(async () => {
+        try {
+            const rows = await d3.csv("/meeting_msp_lax.csv", (d) => ({
+                meeting_airport: (d.meeting_airport || "").toUpperCase(),
+                total_cost: Number(d.total_cost),
+                path_from_MSP: d.path_from_MSP,
+                cost_from_MSP: d.cost_from_MSP ? Number(d.cost_from_MSP) : undefined,
+                path_from_LAX: d.path_from_LAX,
+                cost_from_LAX: d.cost_from_LAX ? Number(d.cost_from_LAX) : undefined,
+            }));
+            meetingRoutes = rows.filter((r) => r.meeting_airport && Number.isFinite(r.total_cost));
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to load meeting routes:", err);
+        }
+    });
 </script>
 
 <p></p>
@@ -62,11 +102,11 @@
         <div class="card">
             <h3>Scene 3: Choosing the Meeting Spot</h3>
             <p>
-                Imagine two colleagues — one in Minneapolis, another in Dallas.
+                Imagine two colleagues — one in Minneapolis, another in Los Angeles.
                 They need to fly and meet somewhere for a one-day training.
-                Should the person in Minnesota fly to Texas? Or should the
-                person in Texas fly north? Maybe neither — perhaps they should
-                meet halfway, in Kansas City, or even at a smaller nearby
+                Should the person in Minnesota fly to California? Or should the
+                person in California fly north? Maybe neither — perhaps they should
+                meet halfway, in Denver, or even at a smaller nearby
                 airport.
             </p>
             <!-- <p>
@@ -218,12 +258,21 @@
                         start.
                     </strong>
                 </p>
-                <div class="map-container">
-                    <MapScene points={[
-                        { lat: 44.8848, lon: -93.2284, name: 'Minneapolis (MSP)' },
-                        { lat: 32.8975, lon: -97.0382, name: 'Dallas (DFW)' },
-                        { lat: 39.2903, lon: -94.7133, name: 'Kansas City (MCI)' }
-                    ]} width={700} height={450} />
+                <div class="map-chart">
+                    <MapScene
+                        width={Math.min(1000, Math.max(500, window.innerWidth - 100))}
+                        height={350}
+                        filterIatas={topRoutes.map((r) => r.meeting_airport)}
+                        highlightIata={activeIata}
+                        originIatas={['MSP', 'LAX']}
+                    />
+                    <RankBar
+                        routes={topRoutes}
+                        width={Math.min(550, Math.max(300, window.innerWidth - 350))}
+                        height={300}
+                        originIatas={['MSP', 'LAX']}
+                        on:hover={handleHover}
+                    />
                 </div>
             {:else if myProgress < 57.14}
                 <p>Scene 4</p>
@@ -369,7 +418,7 @@
         padding: 20px;
         box-sizing: border-box;
     }
-    image-gallery {
+    .image-gallery {
         display: flex; /* Use flexbox to put them next to each other */
         gap: 20px;
         margin-bottom: 15px;
@@ -392,5 +441,13 @@
     .map-container {
         width: 100%;
         margin: 20px 0;
+    }
+    .map-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        width: 100%;
+        margin-top: 1rem;
     }
 </style>
