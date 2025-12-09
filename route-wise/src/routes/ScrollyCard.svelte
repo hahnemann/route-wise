@@ -33,7 +33,7 @@
         activeIata = e.detail.iata;
     };
 
-    onMount(async () => {
+    onMount(async () => { 
         try {
             // Load raw data first
             const rawRows = await d3.csv("/meeting_msp_lax.csv");

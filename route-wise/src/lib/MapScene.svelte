@@ -294,7 +294,32 @@
 		}
 	});
 
-	$: if (dataLoaded && svg && highlightIata !== undefined) {
+	// React to dataSource changes (switching datasets)
+	$: if (svg && dataSource) {
+		(async () => {
+			try {
+				const airportData = (await d3.csv(dataSource)) as AirportRow[];
+				allPoints = parseAirports(airportData);
+				applyFilter();
+				render();
+			} catch (err) {
+				// eslint-disable-next-line no-console
+				console.error('MapScene error reloading data source:', err);
+			}
+		})();
+	}
+
+	// React to dimension changes (width/height)
+	$: if (dataLoaded && svg && (width || height)) {
+		if (states && projection) {
+			projection = d3.geoAlbersUsa().fitSize([width, height], states as any);
+			path = d3.geoPath().projection(projection as any);
+			render();
+		}
+	}
+
+	// React to prop changes (highlight, origins, route data, filters)
+	$: if (dataLoaded && svg && (highlightIata !== undefined || originIatas.length > 0 || routeData !== null || filterIatas.length > 0)) {
 		applyFilter();
 		render();
 	}
