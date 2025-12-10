@@ -10,7 +10,7 @@
 --scrolly-layout: viz-first (default story-first)
  -->
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, type Snippet } from "svelte";
     type Props = {
         progress?: number;
         progressRaw?: number;
@@ -18,6 +18,8 @@
         margin?: number;
         debounce?: number | boolean; // debounce delay in ms, or false to disable.  the delay between the last scroll event and the update of the progress, can optimize performance when the scroll event is too frequent
         throttle?: number | boolean; // throttle delay in ms, the minimum time between two progress updates, can optimize performance when the scroll event is too frequent
+        children?: Snippet;
+        viz?: Snippet;
     };
     let {
         progress = $bindable(),
@@ -26,6 +28,8 @@
         margin = 30,
         debounce = false,
         throttle = false,
+        children,
+        viz,
     }: Props = $props();
 
     let container: HTMLElement, vizContainer;
@@ -81,6 +85,13 @@
             updateProgress();
         }
 
+        function handleScrollEvent(event: Event): void {
+            // Calling calculateProgress() with no arguments forces it to
+            // recalculate 'top' using container.getBoundingClientRect().top,
+            // which is the correct behavior for a scroll event.
+            calculateProgress();
+        }
+
         function updateProgress() {
             let clampedProgress = clamp(0, progressRaw as number, 100);
 
@@ -115,11 +126,11 @@
             if (lastEntry.isIntersecting) {
                 calculateBounds();
                 calculateProgress();
-                window.addEventListener("scroll", calculateProgress);
+                window.addEventListener("scroll", handleScrollEvent);
                 window.addEventListener("resize", calculateBounds);
                 resizeObserver?.observe(container);
             } else {
-                window.removeEventListener("scroll", calculateProgress);
+                window.removeEventListener("scroll", handleScrollEvent);
                 window.removeEventListener("resize", calculateBounds);
                 resizeObserver?.unobserve(container);
             }
@@ -139,10 +150,10 @@
     style="--scrolly-margin: {margin}"
 >
     <section class="story">
-        <slot />
+        {@render children?.()}
     </section>
     <section class="viz" bind:this={vizContainer}>
-        <slot name="viz" />
+        {@render viz?.()}
     </section>
 </section>
 
