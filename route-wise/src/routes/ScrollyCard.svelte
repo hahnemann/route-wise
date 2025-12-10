@@ -1,16 +1,46 @@
 <script lang="ts">
+    import { dijkstra } from "$lib/dijkstra";
     import type { CPP_RouteWise } from "../types";
     type Props = {
         routes: CPP_RouteWise[];
+        routes_cpp: any;
+        graph: any;
     };
-    let { routes }: Props = $props();
+    let { routes, routes_cpp, graph }: Props = $props();
 
+    import RouteMap from "$lib/RouteMap.svelte";
     import { Scrolly } from "$lib";
     import * as d3 from "d3";
     import { get } from "svelte/store";
 
     let myProgress = $state(0);
-    // reactive variable for tracking the progress of the scrollytelling
+
+    let homeAirportCodes = $state(["MSP"]);
+    let meetingAirportCode = $state("DCA");
+    let travelerPaths = $state([] as any[]);
+    // let travelerPaths = $state([]); // Will be filled by Dijkstra later
+
+    const computedPaths = $derived(() => {
+        if (!graph) return [];
+        // const edgesMap = edges;
+        return homeAirportCodes.map((home, idx) => {
+            const result = dijkstra(edges, home, meetingAirportCode);
+            return {
+                travelerId: `T${idx + 1}`,
+                airports: result.path,
+                totalCost: result.totalCost,
+            };
+        });
+    });
+
+    $effect(() => {
+        travelerPaths = computedPaths();
+    });
+
+    // --- DERIVED VALUES ---
+    // Instead of $: airports = ..., we use $derived()
+    const airports = $derived(graph ? Object.values(graph.airports) : []);
+    const edges = $derived(graph ? graph.edges : {});
 </script>
 
 <p></p>
@@ -39,27 +69,14 @@
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
-        <div class="card">
+        <!-- <div class="card">
             <h3>Scene 2: Real World Motivation</h3>
             <p>When meeting logistics waste taxpayer dollars.</p>
-            <!-- <p>
-                The government's City Pair Program (CPP) currently offers over
-                11,000 different routes. As we scroll, the visualization begins
-                to filter this
-                <a
-                    href="https://www.gsa.gov/travel/plan-a-trip/transportation-airfare-rates-pov-rates-etc/airfare-rates-city-pair-program"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    massive number of destinations
-                </a>
-                to isolate the most affordable options for a potential meeting spot.
-            </p> -->
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div>
+        </div> -->
 
         <div class="card">
-            <h3>Scene 3: Choosing the Meeting Spot</h3>
+            <h3>Scene 2: Choosing the Meeting Spot</h3>
             <p>
                 Imagine two colleagues — one in Minneapolis, another in Dallas.
                 They need to fly and meet somewhere for a one-day training.
@@ -79,7 +96,7 @@
         </div>
 
         <div class="card">
-            <h3>Scene 4: The Algorithm</h3>
+            <h3>Scene 3: The Algorithm</h3>
             <p>Finding the most efficient path.</p>
             <!-- <p>
                 When we consider cost and time as weights on the connections
@@ -99,7 +116,7 @@
         </div>
 
         <div class="card">
-            <h3>Scene 5: What is Optimal?</h3>
+            <h3>Scene 4: What is Optimal?</h3>
             <p>
                 An optimal solution is not just the cheapest or fastest route,
                 but the one that provides the best balance between those two
@@ -111,20 +128,55 @@
         </div>
 
         <div class="card">
-            <h3>Scene 6: Solving with Python</h3>
+            <h3>Scene 5: Solving with Python</h3>
             <p>
-                Visualizing the solution and provide a definitive answer to the travel problem, as recommended by GAO.
+                Visualizing the solution and provide a definitive answer to the
+                travel problem, as recommended by GAO.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
         <div class="card">
-            <h3>Scene 7: The Optimal Meeting Place</h3>
+            <h3>Scene 6: The Optimal Meeting Place</h3>
             <p>
-                The final step visualizes the optimal meeting destination on a
-                map. Factors like pollution will be considered as we work out a final story.
+                After defining what "optimal" means and implementing our
+                algorithm in Python, we can now see the result on a real map.
+                The highlighted city is the current meeting point, and each path
+                shows the cheapest route from a traveler's home airport to that
+                city.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+            <label>
+                Home Airport:
+                <select bind:value={homeAirportCodes[0]}>
+                    {#each Object.keys(edges) as code}
+                        <option value={code}>{code}</option>
+                    {/each}
+                </select>
+                <!-- <select bind:value={homeAirportCodes[0]}>
+                    {#each airports as a}
+                        <option value={a.code}>{a.code} – {a.name}</option>
+                    {/each}
+                </select> -->
+            </label>
+            <label>
+                Meeting Airport:
+                <select bind:value={meetingAirportCode}>
+                    {#each Object.keys(edges) as code}
+                        <option value={code}>{code}</option>
+                    {/each}
+                </select>
+                <!-- <select bind:value={meetingAirportCode}>
+                    {#each airports as a}
+                        <option value={a.code}>{a.code} – {a.name}</option>
+                    {/each}
+                </select> -->
+            </label>
+            {#if travelerPaths.length > 0}
+                <p>Total cost: ${travelerPaths[0].totalCost}</p>
+            {:else}
+                <p>Select airports to compute travel cost.</p>
+            {/if}
         </div>
     </div>
 
@@ -169,7 +221,7 @@
                         </figcaption>
                     </figure>
                 </div>
-            {:else if myProgress < 28.57}
+                <!-- {:else if myProgress < 28.57}
                 <p>Scene 2</p>
                 <p>
                     In 2013, the Treasury Inspector General for Tax
@@ -201,10 +253,9 @@
                             information sharing.
                         </figcaption>
                     </figure>
-                </div>
-                <!-- <p>Showing **Scene 2** logic (Thousands of Travel Choices).</p> -->
+                </div> -->
             {:else if myProgress < 42.86}
-                <p>Scene 3</p>
+                <p>Scene 2</p>
                 <p>
                     It sounds simple, but once you add just one more traveler,
                     the choices explode. Each possible meeting city adds new
@@ -229,7 +280,7 @@
                     </figure>
                 </div>
             {:else if myProgress < 57.14}
-                <p>Scene 4</p>
+                <p>Scene 3</p>
                 <p>
                     To solve the meeting-city problem, we turned to Dijkstra's
                     algorithm — a classic method for finding the shortest path
@@ -271,7 +322,7 @@
                     </figure>
                 </div>
             {:else if myProgress < 71.43}
-                <p>Scene 5</p>
+                <p>Scene 4</p>
                 <div class="image-gallery">
                     <figure>
                         <img
@@ -284,7 +335,7 @@
                     </figure>
                 </div>
             {:else if myProgress < 85.71}
-                <p>Scene 6</p>
+                <p>Scene 5</p>
                 <p>
                     We plan to connect the Svelte visualization to Python code
                     designed to execute the Dijkstra algorithm and identify the
@@ -303,15 +354,22 @@
                     </figure>
                 </div>
             {:else}
-                <p>Scene 7</p>
-                <div class="image-gallery">
+                <p>Scene 6</p>
+                <RouteMap
+                    {airports}
+                    {travelerPaths}
+                    {homeAirportCodes}
+                    {meetingAirportCode}
+                />
+                <!-- <div class="image-gallery">
                     <figure>
                         <img
                             src="/images/mci.png"
                             alt="Kansas City - Optimal Meeting Place between Minnesota and Texas"
                         />
                         <figcaption>
-                            Figure 6: Kansas City - Optimal Meeting Place between Minnesota and Texas.
+                            Figure 6: Kansas City - Optimal Meeting Place
+                            between Minnesota and Texas.
                         </figcaption>
                     </figure>
                 </div>
@@ -323,10 +381,11 @@
                             alt="Optimal Meeting Place between Minnesota and Texas"
                         />
                         <figcaption>
-                            Figure 7: Optimal Meeting Place between Minnesota and Texas.
+                            Figure 7: Optimal Meeting Place between Minnesota
+                            and Texas.
                         </figcaption>
                     </figure>
-                </div>
+                </div> -->
             {/if}
         </div>
     </div>
