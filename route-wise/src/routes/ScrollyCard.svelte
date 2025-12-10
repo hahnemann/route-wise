@@ -114,10 +114,10 @@
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
-        <div class="card">
+        <!-- <div class="card">
             <h3>Scene 2: Real World Motivation</h3>
-            <p>When meeting logistics waste taxpayer dollars.</p>
-            <!-- <p>
+            <p>When meeting logistics waste taxpayer dollars.</p> -->
+        <!-- <p>
                 The government's City Pair Program (CPP) currently offers over
                 11,000 different routes. As we scroll, the visualization begins
                 to filter this
@@ -130,11 +130,11 @@
                 </a>
                 to isolate the most affordable options for a potential meeting spot.
             </p> -->
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div>
+        <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+        </div> -->
 
         <div class="card">
-            <h3>Scene 3: Choosing the Meeting Spot</h3>
+            <h3>Scene 2: Choosing the Meeting Spot</h3>
             <p>
                 Imagine two colleagues — one in Minneapolis, another in Los
                 Angeles. They need to fly and meet somewhere for a one-day
@@ -154,7 +154,7 @@
         </div>
 
         <div class="card">
-            <h3>Scene 4: The Algorithm</h3>
+            <h3>Scene 3: The Algorithm</h3>
             <p>Finding the most efficient path.</p>
             <!-- <p>
                 When we consider cost and time as weights on the connections
@@ -174,7 +174,7 @@
         </div>
 
         <div class="card">
-            <h3>Scene 5: What is Optimal?</h3>
+            <h3>Scene 4: What is Optimal?</h3>
             <p>
                 An optimal solution is not just the cheapest or fastest route,
                 but the one that provides the best balance between those two
@@ -186,7 +186,7 @@
         </div>
 
         <div class="card">
-            <h3>Scene 6: Solving with Python</h3>
+            <h3>Scene 5: Solving with Python</h3>
             <p>
                 Visualizing the solution and provide a definitive answer to the
                 travel problem, as recommended by GAO.
@@ -195,7 +195,7 @@
         </div>
 
         <div class="card">
-            <h3>Scene 7: The Optimal Meeting Place</h3>
+            <h3>Scene 6: The Optimal Meeting Place</h3>
             <p>
                 The final step visualizes the optimal meeting destination on a
                 map. Factors like pollution will be considered as we work out a
@@ -210,7 +210,7 @@
             <div class="viz-content">
                 <p>Progress: {myProgress.toFixed(1)}%</p>
                 <!-- <p>Current Progress: **{myProgress.toFixed(1)}%**</p> -->
-                {#if myProgress < 14.29}
+                {#if myProgress < 10.4}
                     <p>Scene 1</p>
                     <p>
                         A nationwide workforce of 3 million federal employees
@@ -248,7 +248,7 @@
                             </figcaption>
                         </figure>
                     </div>
-                {:else if myProgress < 28.57}
+                    <!-- {:else if myProgress < 28.57}
                     <p>Scene 2</p>
                     <p>
                         In 2013, the Treasury Inspector General for Tax
@@ -281,10 +281,10 @@
                                 information sharing.
                             </figcaption>
                         </figure>
-                    </div>
+                    </div> -->
                     <!-- <p>Showing **Scene 2** logic (Thousands of Travel Choices).</p> -->
-                {:else if myProgress < 42.86}
-                    <p>Scene 3</p>
+                {:else if myProgress < 35.1}
+                    <p>Scene 2</p>
                     <p>
                         It sounds simple, but once you add just one more
                         traveler, the choices explode. Each possible meeting
@@ -322,8 +322,8 @@
                             on:hover={handleHover}
                         />
                     </div>
-                {:else if myProgress < 57.14}
-                    <p>Scene 4</p>
+                {:else if myProgress < 57.9}
+                    <p>Scene 3</p>
                     <p>
                         To solve the meeting-city problem, we turned to
                         Dijkstra's algorithm — a classic method for finding the
@@ -366,8 +366,8 @@
                             </figcaption>
                         </figure>
                     </div>
-                {:else if myProgress < 71.43}
-                    <p>Scene 5</p>
+                {:else if myProgress < 82.1}
+                    <p>Scene 4</p>
                     <div class="image-gallery">
                         <figure>
                             <img
@@ -379,8 +379,8 @@
                             </figcaption>
                         </figure>
                     </div>
-                {:else if myProgress < 85.71}
-                    <p>Scene 6</p>
+                {:else if myProgress == 100}
+                    <p>Scene 5</p>
                     <p>
                         We plan to connect the Svelte visualization to Python
                         code designed to execute the Dijkstra algorithm and
@@ -401,7 +401,7 @@
                         </figure>
                     </div>
                 {:else}
-                    <p>Scene 7</p>
+                    <p>Scene 6</p>
                     <div class="image-gallery">
                         <figure>
                             <img
