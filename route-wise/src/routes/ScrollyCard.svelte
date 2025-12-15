@@ -11,6 +11,7 @@
     import RankBar from "$lib/RankBar.svelte";
     import * as d3 from "d3";
     import { get } from "svelte/store";
+    import FinalUSMap from "$lib/FinalUSMap.svelte";
 
     type MeetingRoute = {
         meeting_airport: string;
@@ -21,6 +22,15 @@
     let meetingRoutes = $state<MeetingRoute[]>([]);
     let activeIata: string | null = $state(null);
     let originIatas = $state<string[]>([]);
+
+    let airportList = $state<string[]>([]);
+    let airports = $state<any[]>([]);
+    let selectedIata1 = $state<string | null>(null);
+    let selectedIata2 = $state<string | null>(null);
+    let selectedIata3 = $state<string | null>(null);
+    let meetingAirport = $state<string | null>(null);
+    let isComputingMeeting = $state(false);
+    let meetingError = $state<string | null>(null);
 
     const topRoutes = $derived(
         [...meetingRoutes]
@@ -34,8 +44,70 @@
         activeIata = e.detail.iata;
     };
 
+    async function computeMeeting() {
+        console.log("computeMeeting CALLED with:", selectedIata1, selectedIata2, selectedIata3);
+        if (!selectedIata1 || !selectedIata2 || !selectedIata3) return;
+
+        isComputingMeeting = true;
+        meetingError = null;
+        meetingAirport = null;
+
+        try {
+            const res = await fetch("/api/meeting", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    airports: [selectedIata1, selectedIata2, selectedIata3],
+                }),
+            });
+
+            if (!res.ok) {
+                let err: any = null;
+                try {
+                    err = await res.json();
+                } catch {
+                    // ignore
+                }
+                meetingError = err?.error ?? `Server error (${res.status})`;
+                return;
+            }
+
+            const data = await res.json();
+            meetingAirport = data.meeting ?? null;
+        } catch (e) {
+            console.error(e);
+            meetingError = "Failed to contact meeting-point service.";
+        } finally {
+            isComputingMeeting = false;
+        }
+    }
+
+    $effect(() => {
+        console.log("Dropdown values:", selectedIata1, selectedIata2, selectedIata3);
+    });
+
+    $effect(() => {
+        if (selectedIata1 && selectedIata2 && selectedIata3) {
+            console.log("TRIGGERING computeMeeting() from $effect");
+            computeMeeting();
+        }
+    });
+
     onMount(async () => {
         try {
+            const airportData = await d3.csv("/iata-icao-us.csv");
+            airportList = airportData
+                .map((d) => d.iata)
+                .filter((code) => code && code.trim().length > 0)
+                .sort();
+            airports = airportData
+                .filter((d) => d.iata && d.latitude && d.longitude)
+                .map((d) => ({
+                    iata: d.iata,
+                    lat: +d.latitude,
+                    lon: +d.longitude,
+                }));
+
             // Load raw data first
             const rawRows = await d3.csv("/meeting_msp_lax.csv");
 
@@ -201,6 +273,55 @@
                 map. Factors like pollution will be considered as we work out a
                 final story.
             </p>
+            <!-- Dropdown 1 -->
+            <label><strong>Select Airport 1 (IATA):</strong></label>
+            <select
+                bind:value={selectedIata1}
+                style="padding: 6px; font-size: 1rem; margin-bottom: 10px;"
+            >
+                <option value="" disabled selected>Select an airport</option>
+                {#each airportList as code}
+                    <option value={code}>{code}</option>
+                {/each}
+            </select>
+            <p></p>
+
+            <!-- Dropdown 2 -->
+            <label><strong>Select Airport 2 (IATA):</strong></label>
+            <select
+                bind:value={selectedIata2}
+                style="padding: 6px; font-size: 1rem; margin-bottom: 10px;"
+            >
+                <option value="" disabled selected>Select an airport</option>
+                {#each airportList as code}
+                    <option value={code}>{code}</option>
+                {/each}
+            </select>
+            <p></p>
+
+            <!-- Dropdown 3 -->
+            <label><strong>Select Airport 3 (IATA):</strong></label>
+            <select
+                bind:value={selectedIata3}
+                style="padding: 6px; font-size: 1rem; margin-bottom: 10px;"
+            >
+                <option value="" disabled selected>Select an airport</option>
+                {#each airportList as code}
+                    <option value={code}>{code}</option>
+                {/each}
+            </select>
+            <p></p>
+
+            {#if meetingAirport}
+                <p>Optimal Meeting Airport: {meetingAirport}</p>
+            {:else if isComputingMeeting}
+                <p>Computing optimal meeting airport…</p>
+            {:else if meetingError}
+                <p class="error">
+                    Error computing meeting airport: {meetingError}
+                </p>
+            {/if}
+
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
     </div>
@@ -209,7 +330,6 @@
         <div class="viz-panel">
             <div class="viz-content">
                 <p>Progress: {myProgress.toFixed(1)}%</p>
-                <!-- <p>Current Progress: **{myProgress.toFixed(1)}%**</p> -->
                 {#if myProgress < 10.4}
                     <p>Scene 1</p>
                     <p>
@@ -248,41 +368,6 @@
                             </figcaption>
                         </figure>
                     </div>
-                    <!-- {:else if myProgress < 28.57}
-                    <p>Scene 2</p>
-                    <p>
-                        In 2013, the Treasury Inspector General for Tax
-                        Administration (TIGTA) released a report revealing that
-                        the IRS spent over $4 million on a single Anaheim
-                        conference and did not use a data-driven method to
-                        select the meeting location.
-                    </p>
-                    <p>
-                        In 2016 the Government Accountability Office (GAO)
-                        recommended a travel data management approach that would
-                        provide the government with more consistent travel cost
-                        data
-                    </p>
-                    <p>
-                        <strong
-                            >What if federal agencies used smart algorithms to
-                            minimize cost and travel time for meetings?</strong
-                        >
-                    </p>
-                    <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/gao_report.png"
-                                alt="GAO Report (2016) to improve data and
-                            information sharing."
-                            />
-                            <figcaption>
-                                Figure 1: GAO Report (2016) to improve data and
-                                information sharing.
-                            </figcaption>
-                        </figure>
-                    </div> -->
-                    <!-- <p>Showing **Scene 2** logic (Thousands of Travel Choices).</p> -->
                 {:else if myProgress < 35.1}
                     <p>Scene 2</p>
                     <p>
@@ -379,7 +464,7 @@
                             </figcaption>
                         </figure>
                     </div>
-                {:else if myProgress == 100}
+                {:else if myProgress <= 97.0}
                     <p>Scene 5</p>
                     <p>
                         We plan to connect the Svelte visualization to Python
@@ -392,6 +477,31 @@
                     <div class="image-gallery">
                         <figure>
                             <img
+                                src="/images/mci.png"
+                                alt="Kansas City - Optimal Meeting Place between Minnesota and Texas"
+                            />
+                            <figcaption>
+                                Figure 6: Kansas City - Optimal Meeting Place
+                                between Minnesota and Texas.
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <!-- <p></p>
+                    <div class="image-gallery">
+                        <figure>
+                            <img
+                                src="/images/msp_hou.png"
+                                alt="Optimal Meeting Place between Minnesota and Texas"
+                            />
+                            <figcaption>
+                                Figure 7: Optimal Meeting Place between
+                                Minnesota and Texas.
+                            </figcaption>
+                        </figure>
+                    </div> -->
+                    <!-- <div class="image-gallery">
+                        <figure>
+                            <img
                                 src="/images/vscode.png"
                                 alt="Visual Studio Code Solver."
                             />
@@ -399,10 +509,19 @@
                                 Figure 5: Visual Studio Code Solver.
                             </figcaption>
                         </figure>
-                    </div>
+                    </div> -->
                 {:else}
                     <p>Scene 6</p>
-                    <div class="image-gallery">
+                    <FinalUSMap
+                        width={900}
+                        height={550}
+                        {airports}
+                        {selectedIata1}
+                        {selectedIata2}
+                        {selectedIata3}
+                        meetingAirport={meetingAirport}
+                    />
+                    <!-- <div class="image-gallery">
                         <figure>
                             <img
                                 src="/images/mci.png"
@@ -426,7 +545,7 @@
                                 Minnesota and Texas.
                             </figcaption>
                         </figure>
-                    </div>
+                    </div> -->
                 {/if}
             </div>
         </div>
