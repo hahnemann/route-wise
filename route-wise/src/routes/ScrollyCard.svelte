@@ -93,19 +93,6 @@
                 What if you had to gather people from all across the country in
                 one place — quickly and cheaply?
             </p>
-            <!-- <p>The federal government's travel
-                system involves a vast number of potential destinations and
-                millions in spending, but the sheer volume of options is
-                difficult to evaluate because agencies
-                <a
-                    href="https://www.gao.gov/assets/gao-16-657.pdf#page=2.23"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    lack common metrics
-                </a>
-                and consistent reporting practices for travel costs.
-            </p> -->
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
         </div>
 
@@ -203,41 +190,62 @@
             <p>Progress: {myProgress.toFixed(1)}%</p>
             <!-- <p>Current Progress: **{myProgress.toFixed(1)}%**</p> -->
             {#if myProgress < 14.29}
-                <p>Scene 1</p>
-                <p>
-                    A nationwide workforce of 3 million federal employees often
-                    travel for conferences, training, and cross-agency meetings
-                </p>
-                <p>
-                    <strong
-                        >Where should everyone meet to minimize total cost and
-                        travel time?</strong
-                    >
-                </p>
-                <div class="image-gallery">
-                    <figure>
-                        <img
-                            src="/images/fy23_category.png"
-                            alt="Total (Approximate) Travel Cost in Fiscal
-                            Year 2023"
-                        />
-                        <figcaption>
-                            Table 1: Total (Approximate) Travel Cost in Fiscal
-                            Year 2023
-                        </figcaption>
-                    </figure>
-                    <p></p>
-                    <figure>
-                        <img
-                            src="/images/fy23_type.png"
-                            alt="Total (Approximate) Travel Cost in Fiscal
-                            Year 2023 by Category"
-                        />
-                        <figcaption>
-                            Table 2: Total (Approximate) Travel Cost in Fiscal
-                            Year 2023 by Category
-                        </figcaption>
-                    </figure>
+                <div class="dashboard-scene-1">
+                    <h2>FY 2023 Federal Travel Spending</h2>
+                    <div class="dashboard-stats">
+                        <div class="stat-item fade-in-up" style="--delay: 0.1s">
+                            <div class="stat-icon">💵</div>
+                            <div class="stat-number">$4.7B</div>
+                            <div class="stat-label">Total Travel Expenses</div>
+                        </div>
+                        <div class="stat-item fade-in-up" style="--delay: 0.2s">
+                            <div class="stat-icon">✈️</div>
+                            <div class="stat-number">12.1M</div>
+                            <div class="stat-label">Total Trips</div>
+                        </div>
+                        <div class="stat-item fade-in-up" style="--delay: 0.3s">
+                            <div class="stat-icon">🇺🇸</div>
+                            <div class="stat-number">$3.6B</div>
+                            <div class="stat-label">Domestic Travel</div>
+                        </div>
+                        <div class="stat-item fade-in-up" style="--delay: 0.4s">
+                            <div class="stat-icon">🌍</div>
+                            <div class="stat-number">$1.1B</div>
+                            <div class="stat-label">Foreign Travel</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-breakdown fade-in" style="--delay: 0.5s">
+                        <h3>Expense Breakdown</h3>
+                        <div class="expense-row">
+                            <span class="expense-label">Airfare</span>
+                            <div class="expense-bar">
+                                <div class="expense-fill" style="width: 34%"></div>
+                            </div>
+                            <span class="expense-amount">$1.6B (34%)</span>
+                        </div>
+                        <div class="expense-row">
+                            <span class="expense-label">Lodging</span>
+                            <div class="expense-bar">
+                                <div class="expense-fill" style="width: 26%"></div>
+                            </div>
+                            <span class="expense-amount">$1.2B (26%)</span>
+                        </div>
+                        <div class="expense-row">
+                            <span class="expense-label">Per Diem</span>
+                            <div class="expense-bar">
+                                <div class="expense-fill" style="width: 21%"></div>
+                            </div>
+                            <span class="expense-amount">$1.0B (21%)</span>
+                        </div>
+                        <div class="expense-row">
+                            <span class="expense-label">Other</span>
+                            <div class="expense-bar">
+                                <div class="expense-fill" style="width: 19%"></div>
+                            </div>
+                            <span class="expense-amount">$0.9B (19%)</span>
+                        </div>
+                    </div>
                 </div>
             {:else if myProgress < 28.57}
                 <p>Scene 2</p>
@@ -479,5 +487,274 @@
         align-items: center;
         width: 100%;
         margin-top: 1rem;
+    }
+
+    /* Dashboard Scene 1 Styles */
+    .dashboard-scene-1 {
+        width: 100%;
+        padding: 20px 20px 20px 20px;
+    }
+
+    .dashboard-scene-1 h2 {
+        font-size: 1.8em;
+        color: #433417;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .dashboard-scene-1 h3 {
+        font-size: 1.2em;
+        color: #433417;
+        margin-bottom: 12px;
+        margin-top: 0;
+    }
+
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+    .stat-item {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: default;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 16px 28px rgba(102, 126, 234, 0.4);
+    }
+
+    .stat-item.fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        opacity: 0;
+    }
+
+    .stat-icon {
+        font-size: 2.2em;
+        margin-bottom: 8px;
+        display: block;
+        animation: bounce 2s infinite;
+        animation-delay: var(--delay, 0s);
+    }
+
+    .stat-number {
+        font-size: 1.8em;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 6px;
+        animation: countUp 1.2s ease-out var(--delay, 0s) both;
+    }
+
+    .stat-label {
+        font-size: 0.85em;
+        opacity: 0.9;
+        line-height: 1.3;
+        animation: fadeInUp 0.8s ease-out calc(var(--delay, 0s) + 0.3s) both;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .expense-breakdown {
+        background: #f8f4f7;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .expense-row {
+        display: grid;
+        grid-template-columns: 100px 1fr 120px;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        animation: slideInLeft 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    .expense-row:nth-child(2) { animation-delay: 0.5s; }
+    .expense-row:nth-child(3) { animation-delay: 0.6s; }
+    .expense-row:nth-child(4) { animation-delay: 0.7s; }
+    .expense-row:nth-child(5) { animation-delay: 0.8s; }
+
+    .expense-label {
+        font-size: 0.95em;
+        color: #433417;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .expense-row:hover .expense-label {
+        color: #764ba2;
+    }
+
+    .expense-bar {
+        height: 20px;
+        background: #e5d5e0;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .expense-bar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .expense-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: inherit;
+        animation: fillBar 1.2s ease-out;
+        position: relative;
+        z-index: 1;
+    }
+
+    .expense-amount {
+        font-size: 0.9em;
+        color: #764ba2;
+        font-weight: 600;
+        text-align: right;
+        animation: fadeIn 0.8s ease-out 0.6s both;
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fillBar {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100%;
+            opacity: 1;
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .image-card {
+        margin: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .image-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-card img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .image-card figcaption {
+        padding: 12px;
+        background: #f8f4f7;
+        font-size: 0.9em;
+        color: #433417;
+        font-weight: 500;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.8s ease-in forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .dashboard-scene-1 h2 {
+        font-size: 1.8em;
+        color: #433417;
+        margin-bottom: 20px;
+        text-align: center;
+        animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
