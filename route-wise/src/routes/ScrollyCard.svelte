@@ -95,7 +95,7 @@
 
     onMount(async () => {
         try {
-            const airportData = await d3.csv("/iata-icao-us.csv");
+            const airportData = await d3.csv("/iata-icao-us-awards-2026.csv");
             airportList = airportData
                 .map((d) => d.iata)
                 .filter((code) => code && code.trim().length > 0)
@@ -254,14 +254,12 @@
         </div>
 
         <div class="card">
-            <h3>Scene 6: The Optimal Meeting Place</h3>
+            <h3>The Optimal Meeting Place</h3>
             <p>
-                The final step visualizes the optimal meeting destination on a
-                map. Factors like pollution will be considered as we work out a
-                final story.
+                Choose three airports from the contiguous U.S. to determine the optimal meeting place.
             </p>
             <!-- Dropdown 1 -->
-            <label><strong>Select Airport 1 (IATA):</strong></label>
+            <label><strong>Airport 1:</strong></label>
             <select
                 bind:value={selectedIata1}
                 style="padding: 6px; font-size: 1rem; margin-bottom: 10px;"
@@ -274,7 +272,7 @@
             <p></p>
 
             <!-- Dropdown 2 -->
-            <label><strong>Select Airport 2 (IATA):</strong></label>
+            <label><strong>Airport 2:</strong></label>
             <select
                 bind:value={selectedIata2}
                 style="padding: 6px; font-size: 1rem; margin-bottom: 10px;"
@@ -287,7 +285,7 @@
             <p></p>
 
             <!-- Dropdown 3 -->
-            <label><strong>Select Airport 3 (IATA):</strong></label>
+            <label><strong>Airport 3:</strong></label>
             <select
                 bind:value={selectedIata3}
                 style="padding: 6px; font-size: 1rem; margin-bottom: 10px;"
@@ -300,23 +298,23 @@
             <p></p>
 
             {#if meetingAirport}
-                <p>Optimal Meeting Airport: {meetingAirport}</p>
+                <p>Lowest cost meeting destination: {meetingAirport}</p>
             {:else if isComputingMeeting}
-                <p>Computing optimal meeting airport…</p>
+                <p>Computing lowest cost airfare ...</p>
             {:else if meetingError}
                 <p class="error">
-                    Error computing meeting airport: {meetingError}
+                    Error computing airfare: {meetingError}
                 </p>
             {/if}
 
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+            <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
     </div>
 
     {#snippet viz()}
         <div class="viz-panel">
             <div class="viz-content">
-                <p>Progress: {myProgress.toFixed(1)}%</p>
+                <!-- <p>Progress: {myProgress.toFixed(1)}%</p> -->
                 {#if myProgress < 14.29}
                     <div class="dashboard-scene-1">
                         <h2>FY 2023 Federal Travel Spending</h2>
@@ -518,7 +516,7 @@
                         </figure>
                     </div> -->
                 {:else}
-                    <p>Scene 6</p>
+                    <!-- <p>Scene 6</p> -->
                     <FinalUSMap
                         width={900}
                         height={550}
