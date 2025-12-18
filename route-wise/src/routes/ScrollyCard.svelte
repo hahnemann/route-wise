@@ -12,6 +12,7 @@
     import * as d3 from "d3";
     import { get } from "svelte/store";
     import FinalUSMap from "$lib/FinalUSMap.svelte";
+    import PythonUSMap from "$lib/PythonUSMap.svelte";
 
     type MeetingRoute = {
         meeting_airport: string;
@@ -23,7 +24,9 @@
     let activeIata: string | null = $state(null);
     let originIatas = $state<string[]>([]);
 
+    let pythonAirportList = $state<string[]>([]);
     let airportList = $state<string[]>([]);
+    let pythonAirports = $state<any[]>([]);
     let airports = $state<any[]>([]);
     let selectedIata1 = $state<string | null>(null);
     let selectedIata2 = $state<string | null>(null);
@@ -95,6 +98,19 @@
 
     onMount(async () => {
         try {
+            const pythonAirportData = await d3.csv("/iata-icao-us.csv");
+            pythonAirportList = pythonAirportData
+                .map((d) => d.iata)
+                .filter((code) => code && code.trim().length > 0)
+                .sort();
+            pythonAirports = pythonAirportData
+                .filter((d) => d.iata && d.latitude && d.longitude)
+                .map((d) => ({
+                    iata: d.iata,
+                    lat: +d.latitude,
+                    lon: +d.longitude,
+                }));
+
             const airportData = await d3.csv("/iata-icao-us-awards-2026.csv");
             airportList = airportData
                 .map((d) => d.iata)
@@ -245,12 +261,12 @@
         </div>
 
         <div class="card">
-            <h3>Scene 5: Solving with Python</h3>
+            <h3>Solving with Python</h3>
             <p>
                 Visualizing the solution and provide a definitive answer to the
                 travel problem, as recommended by GAO.
             </p>
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+            <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
 
         <div class="card">
@@ -323,7 +339,7 @@
                                 <div class="stat-icon">💵</div>
                                 <div class="stat-number">$4.7B</div>
                                 <div class="stat-label">Total Travel Expenses</div>
-                            </div>
+                                </div>
                             <div class="stat-item fade-in-up" style="--delay: 0.2s">
                                 <div class="stat-icon">✈️</div>
                                 <div class="stat-number">12.1M</div>
@@ -470,8 +486,17 @@
                         </figure>
                     </div>
                 {:else if myProgress <= 97.0}
-                    <p>Scene 5</p>
-                    <p>
+                    <!-- <p>Scene 5</p> -->
+                    <PythonUSMap
+                        width={900}
+                        height={550}
+                        {pythonAirports}
+                        {selectedIata1}
+                        {selectedIata2}
+                        {selectedIata3}
+                        meetingAirport={meetingAirport}
+                    />
+                    <!-- <p>
                         We plan to connect the Svelte visualization to Python
                         code designed to execute the Dijkstra algorithm and
                         identify the single, optimal route, fulfilling the goal
@@ -491,7 +516,7 @@
                             </figcaption>
                         </figure>
                     </div>
-                    <!-- <p></p>
+                    <p></p>
                     <div class="image-gallery">
                         <figure>
                             <img
