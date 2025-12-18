@@ -777,9 +777,10 @@
         height: 100%;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         border-radius: inherit;
-        animation: fillBar 1.2s ease-out;
         position: relative;
         z-index: 1;
+        width: 0;
+        animation: fillToTarget 1.2s ease-out forwards;
     }
 
     .expense-amount {
@@ -801,14 +802,9 @@
         }
     }
 
-    @keyframes fillBar {
+    @keyframes fillToTarget {
         from {
             width: 0;
-            opacity: 0;
-        }
-        to {
-            width: 100%;
-            opacity: 1;
         }
     }
 
