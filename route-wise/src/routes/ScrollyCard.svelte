@@ -633,7 +633,8 @@
     /* Dashboard Scene 1 Styles */
     .dashboard-scene-1 {
         width: 100%;
-        padding: 20px 20px 20px 20px;
+        max-width: 900px;
+        margin: 0 auto;
     }
 
     .dashboard-scene-1 h2 {
