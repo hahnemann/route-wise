@@ -5,6 +5,7 @@
     };
     let { routes }: Props = $props();
 
+    import { fade } from "svelte/transition";
     import { onMount } from "svelte";
     import { Scrolly } from "$lib";
     import MapScene from "$lib/MapScene.svelte";
@@ -20,6 +21,7 @@
         [key: string]: any; // Allow dynamic path and cost columns
     };
     let myProgress = $state(0);
+    let animationStep = $state(0);
     let meetingRoutes = $state<MeetingRoute[]>([]);
     let activeIata: string | null = $state(null);
     let originIatas = $state<string[]>([]);
@@ -48,7 +50,12 @@
     };
 
     async function computeMeeting() {
-        console.log("computeMeeting CALLED with:", selectedIata1, selectedIata2, selectedIata3);
+        console.log(
+            "computeMeeting CALLED with:",
+            selectedIata1,
+            selectedIata2,
+            selectedIata3,
+        );
         if (!selectedIata1 || !selectedIata2 || !selectedIata3) return;
 
         isComputingMeeting = true;
@@ -86,7 +93,12 @@
     }
 
     $effect(() => {
-        console.log("Dropdown values:", selectedIata1, selectedIata2, selectedIata3);
+        console.log(
+            "Dropdown values:",
+            selectedIata1,
+            selectedIata2,
+            selectedIata3,
+        );
     });
 
     $effect(() => {
@@ -181,12 +193,20 @@
 <Scrolly bind:progress={myProgress}>
     <div class="card-stack">
         <div class="card">
-            <h3>Scene 1: The Challenge of Meeting in One Place</h3>
+            <h3>The Challenge of Meeting in One Place</h3>
             <p>
                 What if you had to gather people from all across the country in
                 one place — quickly and cheaply?
             </p>
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+            <p>
+                In FY 2023, federal travel represented a significant cost to the
+                government, reflecting the scale of official travel required to
+                carry out agency missions. Spending was driven largely by
+                airfare, lodging, and per diem expenses, with domestic travel
+                accounting for the majority of trips and costs, while foreign
+                travel made up a smaller but still notable share.
+            </p>
+            <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
 
         <!-- <div class="card">
@@ -209,7 +229,7 @@
         </div> -->
 
         <div class="card">
-            <h3>Scene 2: Choosing the Meeting Spot</h3>
+            <h3>Choosing the Meeting Spot</h3>
             <p>
                 Imagine two colleagues — one in Minneapolis, another in Los
                 Angeles. They need to fly and meet somewhere for a one-day
@@ -225,13 +245,13 @@
                 time—that we must visualize to identify the single, optimal
                 route for a group of people to meet.
             </p> -->
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
+            <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
 
-        <div class="card">
+        <!-- <div class="card">
             <h3>Scene 3: The Algorithm</h3>
             <p>Finding the most efficient path.</p>
-            <!-- <p>
+            <p>
                 When we consider cost and time as weights on the connections
                 (edges) between cities (nodes) as a graph, this problem becomes
                 a classic shortest path challenge. We can use
@@ -244,11 +264,11 @@
                 </a>
                 to mathematically solve this network problem and find the most efficient
                 route.
-            </p> -->
+            </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div>
+        </div> -->
 
-        <div class="card">
+        <!-- <div class="card">
             <h3>Scene 4: What is Optimal?</h3>
             <p>
                 An optimal solution is not just the cheapest or fastest route,
@@ -258,21 +278,88 @@
                 are only considering cost.
             </p>
             <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div>
+        </div> -->
 
         <div class="card">
-            <h3>Solving with Python</h3>
-            <p>
-                Visualizing the solution and provide a definitive answer to the
-                travel problem, as recommended by GAO.
-            </p>
+            <h3>Solving with an Algorithm (Dijkstra)</h3>
+            <div class="text-sequence-container">
+                {#if animationStep === 0}
+                    <p in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+                        We start with an empty map of the continental U.S.
+                    </p>
+                {:else if animationStep === 1}
+                    <p in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+                        We add all airports with an International Air Transport
+                        Association (IATA) code on the map.
+                    </p>
+                {:else if animationStep === 2}
+                    <p in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+                        We keep only the airports that have airlines with
+                        government contracts. Government employees are only
+                        allowed to fly in these carriers.
+                    </p>
+                {:else if animationStep === 3}
+                    <p in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+                        Suppose colleagues in
+                        <span style="color: orange; font-weight: bold;"
+                            >Detroit(DTW)</span
+                        >,
+                        <span style="color: deepskyblue; font-weight: bold;"
+                            >Phoenix(PHX)</span
+                        >, and
+                        <span style="color: limegreen; font-weight: bold;"
+                            >Las Vegas(LAS)</span
+                        >
+                        need to meet.
+                    </p>
+                {:else if animationStep === 4}
+                    <p in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+                        If we were to guess the optimal meeting place, distance
+                        comes to mind. One would think that shorter distances
+                        reduce total airfare cost. In this case, flying to an
+                        airport in <span style="color: red; font-weight: bold;"
+                            >Kansas (MCI)</span
+                        > makes sense.
+                    </p>
+                {:else if animationStep === 5}
+                    <p in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+                        Algorithms like Dijkstra can find optimal (best)
+                        solutions when the problem is well defined, in this
+                        case, the lowest minimum airfare cost in total. Against
+                        commmon sense due to a longer travel distance, the
+                        optimal meeting place in this case is <span
+                            style="color: red; font-weight: bold;"
+                            >Seattle (SEA)</span
+                        >.
+                    </p>
+                {/if}
+            </div>
+            <div class="button-group">
+                <button
+                    onclick={() =>
+                        (animationStep = Math.max(0, animationStep - 1))}
+                    disabled={animationStep === 0}
+                    class="nav-button"
+                >
+                    Prev
+                </button>
+                <button
+                    onclick={() =>
+                        (animationStep = Math.min(5, animationStep + 1))}
+                    disabled={animationStep === 5}
+                    class="nav-button"
+                >
+                    Next
+                </button>
+            </div>
             <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
 
         <div class="card">
             <h3>The Optimal Meeting Place</h3>
             <p>
-                Choose three airports from the contiguous U.S. to determine the optimal meeting place.
+                You try it! Choose three airports from the contiguous U.S. to
+                determine the optimal meeting place.
             </p>
             <!-- Dropdown 1 -->
             <label><strong>Airport 1:</strong></label>
@@ -331,66 +418,95 @@
         <div class="viz-panel">
             <div class="viz-content">
                 <!-- <p>Progress: {myProgress.toFixed(1)}%</p> -->
-                {#if myProgress < 14.29}
+                {#if myProgress < 20.0}
                     <div class="dashboard-scene-1">
                         <h2>FY 2023 Federal Travel Spending</h2>
                         <div class="dashboard-stats">
-                            <div class="stat-item fade-in-up" style="--delay: 0.1s">
+                            <div
+                                class="stat-item fade-in-up"
+                                style="--delay: 0.1s"
+                            >
                                 <div class="stat-icon">💵</div>
                                 <div class="stat-number">$4.7B</div>
-                                <div class="stat-label">Total Travel Expenses</div>
+                                <div class="stat-label">
+                                    Total Travel Expenses
                                 </div>
-                            <div class="stat-item fade-in-up" style="--delay: 0.2s">
+                            </div>
+                            <div
+                                class="stat-item fade-in-up"
+                                style="--delay: 0.2s"
+                            >
                                 <div class="stat-icon">✈️</div>
                                 <div class="stat-number">12.1M</div>
                                 <div class="stat-label">Total Trips</div>
                             </div>
-                            <div class="stat-item fade-in-up" style="--delay: 0.3s">
+                            <div
+                                class="stat-item fade-in-up"
+                                style="--delay: 0.3s"
+                            >
                                 <div class="stat-icon">🇺🇸</div>
                                 <div class="stat-number">$3.6B</div>
                                 <div class="stat-label">Domestic Travel</div>
                             </div>
-                            <div class="stat-item fade-in-up" style="--delay: 0.4s">
+                            <div
+                                class="stat-item fade-in-up"
+                                style="--delay: 0.4s"
+                            >
                                 <div class="stat-icon">🌍</div>
                                 <div class="stat-number">$1.1B</div>
                                 <div class="stat-label">Foreign Travel</div>
                             </div>
                         </div>
 
-                        <div class="expense-breakdown fade-in" style="--delay: 0.5s">
+                        <div
+                            class="expense-breakdown fade-in"
+                            style="--delay: 0.5s"
+                        >
                             <h3>Expense Breakdown</h3>
                             <div class="expense-row">
                                 <span class="expense-label">Airfare</span>
                                 <div class="expense-bar">
-                                    <div class="expense-fill" style="width: 34%"></div>
+                                    <div
+                                        class="expense-fill"
+                                        style="width: 34%"
+                                    ></div>
                                 </div>
                                 <span class="expense-amount">$1.6B (34%)</span>
                             </div>
                             <div class="expense-row">
                                 <span class="expense-label">Lodging</span>
                                 <div class="expense-bar">
-                                    <div class="expense-fill" style="width: 26%"></div>
+                                    <div
+                                        class="expense-fill"
+                                        style="width: 26%"
+                                    ></div>
                                 </div>
                                 <span class="expense-amount">$1.2B (26%)</span>
                             </div>
                             <div class="expense-row">
                                 <span class="expense-label">Per Diem</span>
                                 <div class="expense-bar">
-                                    <div class="expense-fill" style="width: 21%"></div>
+                                    <div
+                                        class="expense-fill"
+                                        style="width: 21%"
+                                    ></div>
                                 </div>
                                 <span class="expense-amount">$1.0B (21%)</span>
                             </div>
                             <div class="expense-row">
                                 <span class="expense-label">Other</span>
                                 <div class="expense-bar">
-                                    <div class="expense-fill" style="width: 19%"></div>
+                                    <div
+                                        class="expense-fill"
+                                        style="width: 19%"
+                                    ></div>
                                 </div>
                                 <span class="expense-amount">$0.9B (19%)</span>
                             </div>
                         </div>
                     </div>
-                {:else if myProgress < 35.1}
-                    <p>Scene 2</p>
+                {:else if myProgress < 60.0}
+                    <!-- <p>Scene 2</p> -->
                     <p>
                         It sounds simple, but once you add just one more
                         traveler, the choices explode. Each possible meeting
@@ -428,7 +544,7 @@
                             on:hover={handleHover}
                         />
                     </div>
-                {:else if myProgress < 57.9}
+                    <!-- {:else if myProgress < 57.9}
                     <p>Scene 3</p>
                     <p>
                         To solve the meeting-city problem, we turned to
@@ -471,8 +587,8 @@
                                 University).
                             </figcaption>
                         </figure>
-                    </div>
-                {:else if myProgress < 82.1}
+                    </div> -->
+                    <!-- {:else if myProgress < 82.1}
                     <p>Scene 4</p>
                     <div class="image-gallery">
                         <figure>
@@ -484,17 +600,15 @@
                                 Figure 4: A-Star Algorithm (Wikimedia Commons).
                             </figcaption>
                         </figure>
-                    </div>
+                    </div> -->
                 {:else if myProgress <= 97.0}
                     <!-- <p>Scene 5</p> -->
                     <PythonUSMap
                         width={900}
                         height={550}
                         {pythonAirports}
-                        {selectedIata1}
-                        {selectedIata2}
-                        {selectedIata3}
-                        meetingAirport={meetingAirport}
+                        {airports}
+                        {animationStep}
                     />
                     <!-- <p>
                         We plan to connect the Svelte visualization to Python
@@ -549,7 +663,7 @@
                         {selectedIata1}
                         {selectedIata2}
                         {selectedIata3}
-                        meetingAirport={meetingAirport}
+                        {meetingAirport}
                     />
                     <!-- <div class="image-gallery">
                         <figure>
@@ -583,6 +697,47 @@
 </Scrolly>
 
 <style>
+    .text-sequence-container {
+        display: grid;
+        grid-template-areas: "overlay";
+        min-height: 80px; /* Adjust to fit your longest text */
+        align-items: center;
+        margin-bottom: 20px; [cite: 140]
+    }
+
+    .text-sequence-container p {
+        grid-area: overlay;
+        margin: 0; [cite: 141]
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px; [cite: 149]
+    }
+    
+    .nav-button {
+    padding: 8px 16px;
+    background-color: #764ba2; /* Your primary purple */
+    color: #ffffff;            /* Explicitly set text to white */
+    border: none;
+    border-radius: 4px;        /* Matches your stat-item rounding  */
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s;
+    }
+    
+    .nav-button:hover {
+        background-color: #667eea; /* Lighter purple/blue on hover  */
+        transform: translateY(-2px); /* Subtle lift effect [cite: 163] */
+    }
+    
+    .nav-button:disabled {
+        background-color: #e5d5e0; /* Matches your progress bar background  */
+        color: #999;               /* Muted text for disabled state [cite: 145] */
+        cursor: not-allowed;
+        transform: none;
+    }
+    
     .card-stack {
         /* This container ensures the cards are the main scrollable content */
         max-width: 400px; /* Optional: Constrain width for better readability */

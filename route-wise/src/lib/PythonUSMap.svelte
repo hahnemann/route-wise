@@ -8,6 +8,7 @@
         height?: number;
         pythonAirports?: any[];
         airports?: any[];
+        animationStep?: number;
     };
 
     // Props, using Svelte 5 runes-style
@@ -21,6 +22,7 @@
         height = 550,
         pythonAirports = [],
         airports = [],
+        animationStep = 0,
     }: MapProps = $props();
     let states = $state<any[]>([]);
 
@@ -51,18 +53,66 @@
         />
     {/each}
 
-    <!-- All airports as small gray dots -->
-    {#each pythonAirports as ap}
-        {#if projection([ap.lon, ap.lat])}
-            <circle
-                cx={projection([ap.lon, ap.lat])[0]}
-                cy={projection([ap.lon, ap.lat])[1]}
-                r={3}
-                fill="#666"
-                opacity="0.6"
-            />
-        {/if}
-    {/each}
+    {#if animationStep > 0}
+        {#key animationStep}
+            {#each animationStep === 1 ? pythonAirports : airports as ap}
+                {#if projection([ap.lon, ap.lat])}
+                    {@const isHub =
+                        ["DTW", "PHX", "LAS"].includes(ap.iata) &&
+                        animationStep >= 3}
+                    {@const isMCI = ap.iata === "MCI" && animationStep >= 4}
+                    {@const isSEA = ap.iata === "SEA" && animationStep === 5}
+                    {@const isFocus = isHub || isMCI || isSEA}
+                    <circle
+                        cx={projection([ap.lon, ap.lat])[0]}
+                        cy={projection([ap.lon, ap.lat])[1]}
+                        r={isFocus ? 8 : 3}
+                        fill={isSEA
+                            ? "red"
+                            : isMCI
+                              ? "red"
+                              : isHub
+                                ? ap.iata === "DTW"
+                                    ? "orange"
+                                    : ap.iata === "PHX"
+                                      ? "deepskyblue"
+                                      : "limegreen"
+                                : "#666"}
+                        stroke={isFocus ? "white" : "none"}
+                        stroke-width={isFocus ? 2 : 0}
+                        opacity={isFocus ? 1 : 0.6}
+                        in:fade={{ duration: 800 }}
+                    />
+                {/if}
+            {/each}
+        {/key}
+    {/if}
+
+    {#if animationStep === 5}
+        {#each airports.filter((ap) => ap.iata === "MCI") as mci}
+            {@const pos = projection([mci.lon, mci.lat])}
+            {#if pos}
+                <g in:fade={{ duration: 800 }}>
+                    <line
+                        x1={pos[0] - 8}
+                        y1={pos[1] - 8}
+                        x2={pos[0] + 8}
+                        y2={pos[1] + 8}
+                        stroke="black"
+                        stroke-width="3"
+                    />
+                    <line
+                        x1={pos[0] + 8}
+                        y1={pos[1] - 8}
+                        x2={pos[0] - 8}
+                        y2={pos[1] + 8}
+                        stroke="black"
+                        stroke-width="3"
+                    />
+                </g>
+            {/if}
+        {/each}
+    {/if}
 </svg>
 
 <style>
