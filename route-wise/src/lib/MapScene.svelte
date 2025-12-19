@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
 	import { feature } from 'topojson-client';
@@ -17,7 +18,7 @@
 
 	export let width: number = 900;
 	export let height: number = 600;
-	export let dataSource: string = '/unique_airports_with_latlon.csv';
+	export let dataSource: string = base + '/unique_airports_with_latlon.csv';
 	export let filterIatas: string[] = [];
 	export let highlightIata: string | null = null;
 	export let originIatas: string[] = [];
