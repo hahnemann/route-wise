@@ -9,6 +9,9 @@ permissions:
 jobs:
   build_site:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: route-wise # This tells GitHub to go into your subfolder
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,6 +20,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: route-wise/package-lock.json # Points to the lock file
       - name: Install dependencies
         run: npm install
       - name: Build
@@ -24,7 +28,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'build/' # Svelte builds to the 'build' folder by default
+          path: 'route-wise/build/' # Points to the build output inside the subfolder
   deploy:
     needs: build_site
     runs-on: ubuntu-latest
