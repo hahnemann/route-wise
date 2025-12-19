@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import type { CPP_RouteWise } from "../types";
     type Props = {
         routes: CPP_RouteWise[];
@@ -63,7 +64,8 @@
         meetingAirport = null;
 
         try {
-            const res = await fetch("/api/meeting", {
+            const res = await fetch(base + "/api/meeting", {
+            // const res = await fetch("/api/meeting", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -110,7 +112,8 @@
 
     onMount(async () => {
         try {
-            const pythonAirportData = await d3.csv("/iata-icao-us.csv");
+            const pythonAirportData = await d3.csv(base + "/iata-icao-us.csv");
+            // const pythonAirportData = await d3.csv("/iata-icao-us.csv");
             pythonAirportList = pythonAirportData
                 .map((d) => d.iata)
                 .filter((code) => code && code.trim().length > 0)
@@ -123,7 +126,8 @@
                     lon: +d.longitude,
                 }));
 
-            const airportData = await d3.csv("/iata-icao-us-awards-2026.csv");
+            const airportData = await d3.csv(base + "/iata-icao-us-awards-2026.csv");
+            // const airportData = await d3.csv("/iata-icao-us-awards-2026.csv");
             airportList = airportData
                 .map((d) => d.iata)
                 .filter((code) => code && code.trim().length > 0)
@@ -137,7 +141,8 @@
                 }));
 
             // Load raw data first
-            const rawRows = await d3.csv("/meeting_msp_lax.csv");
+            const rawRows = await d3.csv(base + "/meeting_msp_lax.csv");
+            // const rawRows = await d3.csv("/meeting_msp_lax.csv");
 
             if (rawRows.length === 0) return;
 
