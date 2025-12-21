@@ -18,7 +18,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: route-wise/package-lock.json # Points to the lock file
       - name: Install dependencies
