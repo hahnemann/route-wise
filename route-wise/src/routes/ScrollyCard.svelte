@@ -1,4 +1,7 @@
 <script lang="ts">
+    import { findTopMeetingPoints } from "$lib/dijkstra";
+    import { Canvas } from "@threlte/core";
+    import Map3D from "$lib/Map3D.svelte";
     import { buildGraphFromCSV, findOptimalMeetingPoint } from "$lib/dijkstra";
     import type { Graph } from "$lib/dijkstra";
     import { base } from "$app/paths";
@@ -6,6 +9,8 @@
     type Props = {
         routes: CPP_RouteWise[];
     };
+
+    let top10MeetingPoints = $state<{ iata: string; totalCost: number }[]>([]);
     let { routes }: Props = $props();
 
     import { fade } from "svelte/transition";
@@ -59,12 +64,17 @@
         meetingError = null;
 
         try {
+            const startPoints = [selectedIata1, selectedIata2, selectedIata3];
+
             // Run the calculation locally in the browser
-            const result = findOptimalMeetingPoint(flightGraph, [
-                selectedIata1,
-                selectedIata2,
-                selectedIata3,
-            ]);
+            const result = findOptimalMeetingPoint(flightGraph, startPoints);
+
+            // NEW: Get the top 10 list
+            top10MeetingPoints = findTopMeetingPoints(
+                flightGraph,
+                startPoints,
+                10,
+            );
 
             if (result.meetingPoint) {
                 meetingAirport = result.meetingPoint;
@@ -348,7 +358,7 @@
         <div class="viz-panel">
             <div class="viz-content">
                 <!-- <p>Progress: {myProgress.toFixed(1)}%</p> -->
-                {#if myProgress < 20.0}
+                {#if myProgress < 20.6}
                     <div class="dashboard-scene-1">
                         <h2>FY 2023 Federal Travel Spending</h2>
                         <div class="dashboard-stats">
@@ -434,8 +444,7 @@
                             </div>
                         </div>
                     </div>
-                {:else if myProgress < 60.0}
-                    <!-- <p>Scene 2</p> -->
+                {:else if myProgress < 63.4}
                     <p>
                         It sounds simple, but once you add just one more
                         traveler, the choices explode. Each possible meeting
@@ -492,6 +501,19 @@
                         {selectedIata3}
                         {meetingAirport}
                     />
+                    <div class="canvas-container">
+                        <!-- <div class="canvas-header">
+                            <h3>3D Flight Network Analysis</h3>
+                            <p>Use your mouse</p>
+                        </div> -->
+                        <Canvas>
+                            <Map3D
+                                {airports}
+                                {meetingAirport}
+                                {top10MeetingPoints}
+                            />
+                        </Canvas>
+                    </div>
                 {/if}
             </div>
         </div>
@@ -499,6 +521,15 @@
 </Scrolly>
 
 <style>
+    .canvas-container {
+        width: 100%;
+        height: 600px; /* Adjust height as needed for your layout */
+        position: relative;
+        background: #111; /* Dark background helps 3D colors pop */
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
     .text-sequence-container {
         display: grid;
         grid-template-areas: "overlay";

@@ -25,7 +25,10 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
+		"@threlte/core": "^8.3.1",
+		"@threlte/extras": "^9.7.1",
 		"d3": "^7.9.0",
+		"three": "^0.182.0",
 		"topojson-client": "^3.1.0"
 	}
 }
