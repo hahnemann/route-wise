@@ -15,42 +15,11 @@
     <div slot="viz" class="header" style="border: 1px solid blue;">
         <h1>RouteWise</h1>
         <h2>Visualizing Inefficient Federal Travel Spending</h2>
-        <!-- {#if progress > 30}
-            <p
-                in:slide={{
-                    duration: 1000,
-                    axis: "x",
-                }}
-                class="text-xl font-medium"
-            >
-                Visualizing Inefficient Federal Travel Spending
-            </p>
-            <p
-                in:slide={{
-                    duration: 1000,
-                    axis: "x",
-                    delay: 500, // Slight delay for sequential appearance
-                }}
-                class="text-xl font-medium mt-1"
-            >
-                Choosing from {routeNum} Destinations
-            </p>
-        {/if} -->
-
-        <!-- {#if progress > 70}
-            <p in:fly={{ duration: 800, x: 0, y: 200 }}>
-                with data visualizations
-            </p>
-        {/if} -->
     </div>
 </Scrolly>
 
-<!-- <svelte:window bind:scrollY={progress} /> -->
-
 <style>
     .header {
-        /* background-color: #f8f4f7; */
-        /* padding: 80px 60px; */
         height: 60vh;
         width: 100%;
         text-align: center;
@@ -63,8 +32,4 @@
         color: #36454f;
         font-weight: 600; /* Slightly bolder font weight */
     }
-    /* p {
-        font-size: 3vh;
-        color: #778899;
-    } */
 </style>

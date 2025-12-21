@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { base } from '$app/paths';
+    import { buildGraphFromCSV, findOptimalMeetingPoint } from "$lib/dijkstra";
+    import type { Graph } from "$lib/dijkstra";
+    import { base } from "$app/paths";
     import type { CPP_RouteWise } from "../types";
     type Props = {
         routes: CPP_RouteWise[];
@@ -16,10 +18,11 @@
     import FinalUSMap from "$lib/FinalUSMap.svelte";
     import PythonUSMap from "$lib/PythonUSMap.svelte";
 
+    let flightGraph = $state<Graph>({});
     type MeetingRoute = {
         meeting_airport: string;
         total_cost: number;
-        [key: string]: any; // Allow dynamic path and cost columns
+        [key: string]: any;
     };
     let myProgress = $state(0);
     let animationStep = $state(0);
@@ -45,50 +48,33 @@
     );
 
     const handleHover = (e: any) => {
-        // eslint-disable-next-line no-console
         console.log("Hover event received:", e.detail);
         activeIata = e.detail.iata;
     };
 
     async function computeMeeting() {
-        console.log(
-            "computeMeeting CALLED with:",
-            selectedIata1,
-            selectedIata2,
-            selectedIata3,
-        );
         if (!selectedIata1 || !selectedIata2 || !selectedIata3) return;
 
         isComputingMeeting = true;
         meetingError = null;
-        meetingAirport = null;
 
         try {
-            const res = await fetch(base + "/api/meeting", {
-            // const res = await fetch("/api/meeting", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    airports: [selectedIata1, selectedIata2, selectedIata3],
-                }),
-            });
+            // Run the calculation locally in the browser
+            const result = findOptimalMeetingPoint(flightGraph, [
+                selectedIata1,
+                selectedIata2,
+                selectedIata3,
+            ]);
 
-            if (!res.ok) {
-                let err: any = null;
-                try {
-                    err = await res.json();
-                } catch {
-                    // ignore
-                }
-                meetingError = err?.error ?? `Server error (${res.status})`;
-                return;
+            if (result.meetingPoint) {
+                meetingAirport = result.meetingPoint;
+            } else {
+                meetingError =
+                    "No common meeting point found for these airports.";
             }
-
-            const data = await res.json();
-            meetingAirport = data.meeting ?? null;
         } catch (e) {
             console.error(e);
-            meetingError = "Failed to contact meeting-point service.";
+            meetingError = "Error calculating optimal route.";
         } finally {
             isComputingMeeting = false;
         }
@@ -126,8 +112,9 @@
                     lon: +d.longitude,
                 }));
 
-            const airportData = await d3.csv(base + "/iata-icao-us-awards-2026.csv");
-            // const airportData = await d3.csv("/iata-icao-us-awards-2026.csv");
+            const airportData = await d3.csv(
+                base + "/iata-icao-us-awards-2026.csv",
+            );
             airportList = airportData
                 .map((d) => d.iata)
                 .filter((code) => code && code.trim().length > 0)
@@ -140,9 +127,7 @@
                     lon: +d.longitude,
                 }));
 
-            // Load raw data first
             const rawRows = await d3.csv(base + "/meeting_msp_lax.csv");
-            // const rawRows = await d3.csv("/meeting_msp_lax.csv");
 
             if (rawRows.length === 0) return;
 
@@ -159,7 +144,6 @@
                     return numA - numB;
                 });
 
-            // Parse rows with dynamic columns
             const rows: MeetingRoute[] = rawRows.map((d) => {
                 const row: MeetingRoute = {
                     meeting_airport: (d.meeting_airport || "").toUpperCase(),
@@ -182,12 +166,12 @@
                 (r) => r.meeting_airport && Number.isFinite(r.total_cost),
             );
 
-            // Store origin IATAs - we'll need airport names from an external source or hardcode them
-            // For now, assume path1 is from first origin, path2 from second, etc.
-            // You may need to load this from a config or data source
-            originIatas = ["MSP", "LAX"]; // Default, but this could be detected or passed in
+            originIatas = ["MSP", "LAX"];
+
+            // NEW: Load the flight fare data to build the graph
+            const flightData = await d3.csv(base + "/awards_us_2026.csv");
+            flightGraph = buildGraphFromCSV(flightData);
         } catch (err) {
-            // eslint-disable-next-line no-console
             console.error("Failed to load meeting routes:", err);
         }
     });
@@ -214,25 +198,6 @@
             <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
 
-        <!-- <div class="card">
-            <h3>Scene 2: Real World Motivation</h3>
-            <p>When meeting logistics waste taxpayer dollars.</p> -->
-        <!-- <p>
-                The government's City Pair Program (CPP) currently offers over
-                11,000 different routes. As we scroll, the visualization begins
-                to filter this
-                <a
-                    href="https://www.gsa.gov/travel/plan-a-trip/transportation-airfare-rates-pov-rates-etc/airfare-rates-city-pair-program"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    massive number of destinations
-                </a>
-                to isolate the most affordable options for a potential meeting spot.
-            </p> -->
-        <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div> -->
-
         <div class="card">
             <h3>Choosing the Meeting Spot</h3>
             <p>
@@ -243,47 +208,8 @@
                 perhaps they should meet halfway, in Denver, or even at a
                 smaller nearby airport.
             </p>
-            <!-- <p>
-                Travel decisions are universally constrained by two critical
-                factors: cost and time. These two dictate the specific
-                performance metrics—like average fare and total journey
-                time—that we must visualize to identify the single, optimal
-                route for a group of people to meet.
-            </p> -->
             <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
-
-        <!-- <div class="card">
-            <h3>Scene 3: The Algorithm</h3>
-            <p>Finding the most efficient path.</p>
-            <p>
-                When we consider cost and time as weights on the connections
-                (edges) between cities (nodes) as a graph, this problem becomes
-                a classic shortest path challenge. We can use
-                <a
-                    href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Dijkstra's algorithm
-                </a>
-                to mathematically solve this network problem and find the most efficient
-                route.
-            </p>
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div> -->
-
-        <!-- <div class="card">
-            <h3>Scene 4: What is Optimal?</h3>
-            <p>
-                An optimal solution is not just the cheapest or fastest route,
-                but the one that provides the best balance between those two
-                conflicting metrics, often determined by a weighted combination
-                of cost and time based on the traveler's priorities. For now we
-                are only considering cost.
-            </p>
-            <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p>
-        </div> -->
 
         <div class="card">
             <h3>Solving with an Algorithm (Dijkstra)</h3>
@@ -414,7 +340,6 @@
                     Error computing airfare: {meetingError}
                 </p>
             {/if}
-
             <!-- <p class="progress-indicator">Progress: {myProgress.toFixed(1)}%</p> -->
         </div>
     </div>
@@ -462,7 +387,6 @@
                                 <div class="stat-label">Foreign Travel</div>
                             </div>
                         </div>
-
                         <div
                             class="expense-breakdown fade-in"
                             style="--delay: 0.5s"
@@ -549,65 +473,7 @@
                             on:hover={handleHover}
                         />
                     </div>
-                    <!-- {:else if myProgress < 57.9}
-                    <p>Scene 3</p>
-                    <p>
-                        To solve the meeting-city problem, we turned to
-                        Dijkstra's algorithm — a classic method for finding the
-                        shortest path across a network.
-                    </p>
-                    <p>
-                        In our case, the network is made of airports, and each
-                        edge between them represents a fixed travel cost from
-                        the
-                        <a
-                            href="https://www.gsa.gov/travel/plan-a-trip/transportation-airfare-rates-pov-rates-etc/airfare-rates-city-pair-program"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            City-Pair-Program (CPP)
-                        </a> dataset.
-                    </p>
-                    <p>
-                        It's a simple but powerful search: efficient,
-                        deterministic, and perfectly suited for mapping travel
-                        decisions at scale.
-                    </p>
-                    <p>
-                        <strong
-                            >The algorithm explores all possible routes,
-                            continuously updating the lowest-cost paths until it
-                            finds the optimal meeting point — the city that
-                            minimizes the total cost for everyone involved.</strong
-                        >
-                    </p>
-                    <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/dijkstra_animated.gif"
-                                alt="Dijkstra's Algorithm (Stony Brook University)"
-                            />
-                            <figcaption>
-                                Figure 3: Dijkstra's Algorithm (Stony Brook
-                                University).
-                            </figcaption>
-                        </figure>
-                    </div> -->
-                    <!-- {:else if myProgress < 82.1}
-                    <p>Scene 4</p>
-                    <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/a_star.gif"
-                                alt="A-Star Algorithm (Wikimedia Commons)"
-                            />
-                            <figcaption>
-                                Figure 4: A-Star Algorithm (Wikimedia Commons).
-                            </figcaption>
-                        </figure>
-                    </div> -->
                 {:else if myProgress <= 97.0}
-                    <!-- <p>Scene 5</p> -->
                     <PythonUSMap
                         width={900}
                         height={550}
@@ -615,50 +481,6 @@
                         {airports}
                         {animationStep}
                     />
-                    <!-- <p>
-                        We plan to connect the Svelte visualization to Python
-                        code designed to execute the Dijkstra algorithm and
-                        identify the single, optimal route, fulfilling the goal
-                        of making the data usable - <strong
-                            >in real time.</strong
-                        >
-                    </p>
-                    <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/mci.png"
-                                alt="Kansas City - Optimal Meeting Place between Minnesota and Texas"
-                            />
-                            <figcaption>
-                                Figure 6: Kansas City - Optimal Meeting Place
-                                between Minnesota and Texas.
-                            </figcaption>
-                        </figure>
-                    </div>
-                    <p></p>
-                    <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/msp_hou.png"
-                                alt="Optimal Meeting Place between Minnesota and Texas"
-                            />
-                            <figcaption>
-                                Figure 7: Optimal Meeting Place between
-                                Minnesota and Texas.
-                            </figcaption>
-                        </figure>
-                    </div> -->
-                    <!-- <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/vscode.png"
-                                alt="Visual Studio Code Solver."
-                            />
-                            <figcaption>
-                                Figure 5: Visual Studio Code Solver.
-                            </figcaption>
-                        </figure>
-                    </div> -->
                 {:else}
                     <!-- <p>Scene 6</p> -->
                     <FinalUSMap
@@ -670,31 +492,6 @@
                         {selectedIata3}
                         {meetingAirport}
                     />
-                    <!-- <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/mci.png"
-                                alt="Kansas City - Optimal Meeting Place between Minnesota and Texas"
-                            />
-                            <figcaption>
-                                Figure 6: Kansas City - Optimal Meeting Place
-                                between Minnesota and Texas.
-                            </figcaption>
-                        </figure>
-                    </div>
-                    <p></p>
-                    <div class="image-gallery">
-                        <figure>
-                            <img
-                                src="/images/msp_hou.png"
-                                alt="Optimal Meeting Place between Minnesota and Texas"
-                            />
-                            <figcaption>
-                                Figure 7: Optimal Meeting Place between
-                                Minnesota and Texas.
-                            </figcaption>
-                        </figure>
-                    </div> -->
                 {/if}
             </div>
         </div>
@@ -722,90 +519,92 @@
     
     .nav-button {
     padding: 8px 16px;
-    background-color: #764ba2; /* Your primary purple */
-    color: #ffffff;            /* Explicitly set text to white */
+    background-color: #764ba2;
+    color: #ffffff;
     border: none;
-    border-radius: 4px;        /* Matches your stat-item rounding  */
+    border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s;
     }
     
     .nav-button:hover {
-        background-color: #667eea; /* Lighter purple/blue on hover  */
-        transform: translateY(-2px); /* Subtle lift effect [cite: 163] */
+        background-color: #667eea;
+        transform: translateY(-2px);
     }
     
     .nav-button:disabled {
-        background-color: #e5d5e0; /* Matches your progress bar background  */
-        color: #999;               /* Muted text for disabled state [cite: 145] */
+        background-color: #e5d5e0;
+        color: #999;
         cursor: not-allowed;
         transform: none;
     }
     
     .card-stack {
-        /* This container ensures the cards are the main scrollable content */
-        max-width: 400px; /* Optional: Constrain width for better readability */
+        max-width: 400px;
     }
+
     .card {
-        /* Add vertical padding to each card to force scrolling */
         padding: 400px 0;
         text-align: left;
     }
+
     .card:first-child {
-        /* Reduce padding on the top card to prevent a huge initial gap */
         padding-top: 150px;
     }
+
     .card:last-child {
-        /* Reduce padding on the bottom card to prevent excessive final scroll */
         padding-bottom: 150px;
     }
+
     h3 {
         font-size: 1.5em;
         margin-bottom: 10px;
         color: #433417;
     }
+
     .progress-indicator {
         font-size: 0.9em;
         color: #999;
         margin-top: 20px;
     }
+
     .viz-panel {
-        /* Ensure the visualization panel takes up vertical space within its sticky container */
         height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
         flex-direction: column;
-        background-color: #f7f7f7; /* Light background for the viz area */
+        background-color: #f7f7f7;
         border: 1px solid #ddd;
         padding: 20px;
         box-sizing: border-box;
     }
+
     .image-gallery {
-        display: flex; /* Use flexbox to put them next to each other */
+        display: flex;
         gap: 20px;
         margin-bottom: 15px;
     }
+
     .image-gallery figure {
-        flex: 1; /* Make both images take equal space */
+        flex: 1;
         margin: 0;
         text-align: center;
     }
+
     .image-gallery img {
         max-width: 100%;
         height: auto;
         border-radius: 4px;
     }
+    
     figcaption {
         font-size: 0.8em;
         color: #666;
         margin-top: 5px;
     }
-    /* .map-container {
-        width: 100%;
-        margin: 20px 0;
-    } */
+
     .map-chart {
         display: flex;
         flex-direction: column;
@@ -815,7 +614,6 @@
         margin-top: 1rem;
     }
 
-    /* Dashboard Scene 1 Styles */
     .dashboard-scene-1 {
         width: 100%;
         max-width: 900px;
